@@ -6,6 +6,9 @@
 #include "GameFramework/Character.h"
 #include "RoguelikeCharacter.generated.h"
 
+class UCameraComponent;
+class USpringArmComponent;
+
 UCLASS()
 class ACTIONROGUELIKE_API ARoguelikeCharacter : public ACharacter
 {
@@ -16,8 +19,19 @@ public:
 	ARoguelikeCharacter();
 
 protected:
+
+	UPROPERTY(VisibleAnywhere);
+	USpringArmComponent* SpringArmComp;
+
+	UPROPERTY(VisibleAnywhere);
+	UCameraComponent* CameraComp;
+	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	void MoveForward(float Value);
+	
+	void MoveRight(float Value);
 
 public:	
 	// Called every frame
