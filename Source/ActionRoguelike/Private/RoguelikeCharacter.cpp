@@ -3,6 +3,7 @@
 
 #include "RoguelikeCharacter.h"
 
+#include "RoguelikeInteractionComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -13,12 +14,14 @@ ARoguelikeCharacter::ARoguelikeCharacter()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>("SpringArmComp");
+	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComp"));
 	SpringArmComp->bUsePawnControlRotation = true;
 	SpringArmComp->SetupAttachment(RootComponent);
 
-	CameraComp = CreateDefaultSubobject<UCameraComponent>("CameraComp");
+	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
 	CameraComp->SetupAttachment(SpringArmComp);
+
+	InteractionComp = CreateDefaultSubobject<URoguelikeInteractionComponent>(TEXT("InteractionComp"));
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 
@@ -51,6 +54,8 @@ void ARoguelikeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 
 	PlayerInputComponent->BindAction("PrimaryAttack", IE_Pressed, this, &ARoguelikeCharacter::PrimaryAttack);
+	PlayerInputComponent->BindAction("PrimaryInteract", IE_Pressed, this, &ARoguelikeCharacter::PrimaryInteract);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 }
 
 void ARoguelikeCharacter::MoveForward(float Value)
@@ -75,6 +80,13 @@ void ARoguelikeCharacter::MoveRight(float Value)
 
 void ARoguelikeCharacter::PrimaryAttack()
 {
+	PlayAnimMontage(AttackAnim);
+
+	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &ARoguelikeCharacter::PrimaryAttack_TimeElapsed, 0.2f);
+}
+
+void ARoguelikeCharacter::PrimaryAttack_TimeElapsed()
+{
 	FVector RightHandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
 	
 	FTransform SpawnTM = FTransform(GetControlRotation(), RightHandLocation);
@@ -85,3 +97,10 @@ void ARoguelikeCharacter::PrimaryAttack()
 	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);
 }
 
+void ARoguelikeCharacter::PrimaryInteract()
+{
+	if (InteractionComp)
+	{
+		InteractionComp->PrimaryInteract();	
+	}
+}
