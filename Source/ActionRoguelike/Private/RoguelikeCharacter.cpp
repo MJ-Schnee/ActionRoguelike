@@ -87,15 +87,30 @@ void ARoguelikeCharacter::PrimaryAttack()
 
 void ARoguelikeCharacter::PrimaryAttack_TimeElapsed()
 {
+	// Raycast from camera to determine attack rotation adjustment for aim
+	FVector TraceStart = CameraComp->GetComponentLocation();
+	FVector TraceEnd = TraceStart + CameraComp->GetForwardVector() * 3000.0f;
+	FHitResult Hit;
+	FVector HitLoc;
+	if (GetWorld()->LineTraceSingleByChannel(Hit, TraceStart, TraceEnd, ECC_Visibility))
+	{
+		HitLoc = Hit.Location;
+	} else
+	{
+		HitLoc = TraceEnd;
+	}
+
 	FVector RightHandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
+
+	FRotator RotationToCrosshair = (HitLoc - RightHandLocation).Rotation();
 	
-	FTransform SpawnTM = FTransform(GetControlRotation(), RightHandLocation);
+	FTransform SpawnTransform = FTransform(RotationToCrosshair, RightHandLocation);
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	SpawnParams.Instigator = this;
 	
-	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);
+	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTransform, SpawnParams);
 }
 
 void ARoguelikeCharacter::PrimaryInteract()
