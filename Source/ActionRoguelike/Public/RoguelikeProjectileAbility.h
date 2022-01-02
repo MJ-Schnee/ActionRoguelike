@@ -14,12 +14,8 @@ UCLASS()
 class ACTIONROGUELIKE_API ARoguelikeProjectileAbility : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
-	ARoguelikeProjectileAbility();
 
 protected:
-	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	USphereComponent* SphereComp;
 	
@@ -29,6 +25,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UParticleSystemComponent* EffectComp;
 	
+public:	
+	ARoguelikeProjectileAbility();
+
+protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	

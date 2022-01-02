@@ -7,7 +7,6 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Particles/ParticleSystemComponent.h"
 
-// Sets default values
 ARoguelikeProjectileAbility::ARoguelikeProjectileAbility()
 {
 	// To improve performance, disable Tick() by default
@@ -24,9 +23,9 @@ ARoguelikeProjectileAbility::ARoguelikeProjectileAbility()
 	MovementComp->InitialSpeed = 1000.0f;
 	MovementComp->bRotationFollowsVelocity = true;
 	MovementComp->bInitialVelocityInLocalSpace = true;
+	MovementComp->ProjectileGravityScale = 0.0f;
 }
 
-// Called when the game starts or when spawned
 void ARoguelikeProjectileAbility::BeginPlay()
 {
 	Super::BeginPlay();

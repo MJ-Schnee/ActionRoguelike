@@ -7,12 +7,12 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "RoguelikeProjectileAbility.h"
 
-// Sets default values
 ARoguelikeCharacter::ARoguelikeCharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+ 	// Disable calling Tick() to improve performance
+	PrimaryActorTick.bCanEverTick = false;
 
 	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComp"));
 	SpringArmComp->bUsePawnControlRotation = true;
@@ -28,34 +28,39 @@ ARoguelikeCharacter::ARoguelikeCharacter()
 	bUseControllerRotationYaw = false;
 }
 
-// Called when the game starts or when spawned
+void ARoguelikeCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	
+	FName RightHandSocket = "Muzzle_01";
+	UClass* PrimaryAttack = PrimaryAttackBP;
+	TimerDelegate_PrimaryAttack.BindUFunction(this, FName("UseAbility_TimeElapsed"), RightHandSocket, PrimaryAttack);
+
+	UClass* BlackHoleAbility = BlackHoleAbilityBP;
+	TimerDelegate_BlackHoleAbility.BindUFunction(this, FName("UseAbility_TimeElapsed"), RightHandSocket, BlackHoleAbility);
+}
+
 void ARoguelikeCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
 }
 
-// Called every frame
-void ARoguelikeCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-
-// Called to bind functionality to input
 void ARoguelikeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ARoguelikeCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ARoguelikeCharacter::MoveRight);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 
 	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
+	
+	PlayerInputComponent->BindAction("PrimaryInteract", IE_Pressed, this, &ARoguelikeCharacter::PrimaryInteract);
 
 	PlayerInputComponent->BindAction("PrimaryAttack", IE_Pressed, this, &ARoguelikeCharacter::PrimaryAttack);
-	PlayerInputComponent->BindAction("PrimaryInteract", IE_Pressed, this, &ARoguelikeCharacter::PrimaryInteract);
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+	PlayerInputComponent->BindAction("BlackHoleAbility", IE_Pressed, this, &ARoguelikeCharacter::BlackHoleAbility);
 }
 
 void ARoguelikeCharacter::MoveForward(float Value)
@@ -78,14 +83,15 @@ void ARoguelikeCharacter::MoveRight(float Value)
 	AddMovementInput(RightVector, Value);
 }
 
-void ARoguelikeCharacter::PrimaryAttack()
+void ARoguelikeCharacter::PrimaryInteract()
 {
-	PlayAnimMontage(AttackAnim);
-
-	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &ARoguelikeCharacter::PrimaryAttack_TimeElapsed, 0.2f);
+	if (InteractionComp)
+	{
+		InteractionComp->PrimaryInteract();	
+	}
 }
 
-void ARoguelikeCharacter::PrimaryAttack_TimeElapsed()
+void ARoguelikeCharacter::UseAbility_TimeElapsed(FName SpawnSocket, UClass* AbilityClass)
 {
 	// Raycast from camera to determine attack rotation adjustment for aim
 	FVector TraceStart = CameraComp->GetComponentLocation();
@@ -100,7 +106,7 @@ void ARoguelikeCharacter::PrimaryAttack_TimeElapsed()
 		HitLoc = TraceEnd;
 	}
 
-	FVector RightHandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
+	FVector RightHandLocation = GetMesh()->GetSocketLocation(SpawnSocket);
 
 	FRotator RotationToCrosshair = (HitLoc - RightHandLocation).Rotation();
 	
@@ -110,13 +116,19 @@ void ARoguelikeCharacter::PrimaryAttack_TimeElapsed()
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	SpawnParams.Instigator = this;
 	
-	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTransform, SpawnParams);
+	GetWorld()->SpawnActor<AActor>(AbilityClass, SpawnTransform, SpawnParams);
 }
 
-void ARoguelikeCharacter::PrimaryInteract()
+void ARoguelikeCharacter::PrimaryAttack()
 {
-	if (InteractionComp)
-	{
-		InteractionComp->PrimaryInteract();	
-	}
+	PlayAnimMontage(PrimaryAttackAnim);
+
+	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, TimerDelegate_PrimaryAttack, 0.2f, false);
+}
+
+void ARoguelikeCharacter::BlackHoleAbility()
+{
+	PlayAnimMontage(BlackHoleAbilityAnim);
+
+	GetWorldTimerManager().SetTimer(TimerHandle_BlackHoleAbility, TimerDelegate_BlackHoleAbility, 0.2f, false);
 }
