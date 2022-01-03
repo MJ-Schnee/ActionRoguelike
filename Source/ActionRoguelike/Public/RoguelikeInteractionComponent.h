@@ -13,18 +13,14 @@ class ACTIONROGUELIKE_API URoguelikeInteractionComponent : public UActorComponen
 	GENERATED_BODY()
 
 public:
-
-	void PrimaryInteract();
-	
 	// Sets default values for this component's properties
 	URoguelikeInteractionComponent();
+
+	// Executes Interact() on the interactable closest to where the player is looking 
+	void PrimaryInteract();
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-		
+	
 };
