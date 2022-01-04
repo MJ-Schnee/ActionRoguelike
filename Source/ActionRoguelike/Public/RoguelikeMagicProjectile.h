@@ -3,11 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "RoguelikeProjectileAbility.h"
+#include "RoguelikeProjectile.h"
 #include "RoguelikeMagicProjectile.generated.h"
 
 UCLASS()
-class ACTIONROGUELIKE_API ARoguelikeMagicProjectile : public ARoguelikeProjectileAbility
+class ACTIONROGUELIKE_API ARoguelikeMagicProjectile : public ARoguelikeProjectile
 {
 	GENERATED_BODY()
 	

@@ -1,13 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "RoguelikeProjectileAbility.h"
+#include "RoguelikeProjectile.h"
 
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Particles/ParticleSystemComponent.h"
 
-ARoguelikeProjectileAbility::ARoguelikeProjectileAbility()
+ARoguelikeProjectile::ARoguelikeProjectile()
 {
 	// To improve performance, disable Tick() by default
 	PrimaryActorTick.bCanEverTick = false;
@@ -26,7 +26,7 @@ ARoguelikeProjectileAbility::ARoguelikeProjectileAbility()
 	MovementComp->ProjectileGravityScale = 0.0f;
 }
 
-void ARoguelikeProjectileAbility::BeginPlay()
+void ARoguelikeProjectile::BeginPlay()
 {
 	Super::BeginPlay();
 	

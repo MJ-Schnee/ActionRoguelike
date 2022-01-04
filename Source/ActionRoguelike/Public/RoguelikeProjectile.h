@@ -4,14 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "RoguelikeProjectileAbility.generated.h"
+#include "RoguelikeProjectile.generated.h"
 
 class USphereComponent;
 class UProjectileMovementComponent;
 class UParticleSystemComponent;
 
 UCLASS()
-class ACTIONROGUELIKE_API ARoguelikeProjectileAbility : public AActor
+class ACTIONROGUELIKE_API ARoguelikeProjectile : public AActor
 {
 	GENERATED_BODY()
 
@@ -26,7 +26,7 @@ protected:
 	UParticleSystemComponent* EffectComp;
 	
 public:	
-	ARoguelikeProjectileAbility();
+	ARoguelikeProjectile();
 
 protected:
 	// Called when the game starts or when spawned

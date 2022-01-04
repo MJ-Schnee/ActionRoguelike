@@ -10,7 +10,7 @@ class UCameraComponent;
 class USpringArmComponent;
 class URoguelikeInteractionComponent;
 class UAnimMontage;
-class ARoguelikeProjectileAbility;
+class ARoguelikeProjectile;
 
 UCLASS()
 class ACTIONROGUELIKE_API ARoguelikeCharacter : public ACharacter
@@ -20,7 +20,7 @@ class ACTIONROGUELIKE_API ARoguelikeCharacter : public ACharacter
 protected:
 	// Primary attack
 	UPROPERTY(EditAnywhere, Category="Attack")
-	TSubclassOf<ARoguelikeProjectileAbility> PrimaryAttackBP;
+	TSubclassOf<ARoguelikeProjectile> PrimaryAttackBP;
 
 	UPROPERTY(EditAnywhere, Category="Attack")
 	UAnimMontage* PrimaryAttackAnim;
@@ -30,13 +30,23 @@ protected:
 
 	// Black hole ability
 	UPROPERTY(EditAnywhere, Category="Attack")
-	TSubclassOf<ARoguelikeProjectileAbility> BlackHoleAbilityBP;
+	TSubclassOf<ARoguelikeProjectile> BlackHoleAbilityBP;
 	
 	UPROPERTY(EditAnywhere, Category="Attack")
 	UAnimMontage* BlackHoleAbilityAnim;
 	
 	FTimerDelegate TimerDelegate_BlackHoleAbility;
 	FTimerHandle TimerHandle_BlackHoleAbility;
+
+	// Teleport ability
+	UPROPERTY(EditAnywhere, Category="Attack")
+	TSubclassOf<ARoguelikeProjectile> TeleportAbilityBP;
+	
+	UPROPERTY(EditAnywhere, Category="Attack")
+	UAnimMontage* TeleportAbilityAnim;
+	
+	FTimerDelegate TimerDelegate_TeleportAbility;
+	FTimerHandle TimerHandle_TeleportAbility;
 
 public:
 	// Sets default values for this character's properties
@@ -72,6 +82,8 @@ protected:
 	void PrimaryAttack();
 	
 	void BlackHoleAbility();
+
+	void TeleportAbility();
 
 public:
 	// Called to bind functionality to input

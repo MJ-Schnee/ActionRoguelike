@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "RoguelikeProjectileAbility.h"
+#include "RoguelikeProjectile.h"
 #include "RoguelikeBlackHoleAbility.generated.h"
 
 class URadialForceComponent;
@@ -14,7 +14,7 @@ class URadialForceComponent;
  * When the objects overlap the black hole, they are destroyed (this logic is located in blueprints)
  */
 UCLASS()
-class ACTIONROGUELIKE_API ARoguelikeBlackHoleAbility : public ARoguelikeProjectileAbility
+class ACTIONROGUELIKE_API ARoguelikeBlackHoleAbility : public ARoguelikeProjectile
 {
 	GENERATED_BODY()
 	
