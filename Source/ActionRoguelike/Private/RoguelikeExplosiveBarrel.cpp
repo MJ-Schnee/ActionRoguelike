@@ -3,6 +3,7 @@
 
 #include "RoguelikeExplosiveBarrel.h"
 
+#include "RoguelikeAttributeComponent.h"
 #include "PhysicsEngine/RadialForceComponent.h"
 
 // Sets default values
@@ -30,6 +31,18 @@ void ARoguelikeExplosiveBarrel::PostInitializeComponents()
 void ARoguelikeExplosiveBarrel::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	RadialForceComp->FireImpulse();
+
+	if (OtherActor)
+	{
+		URoguelikeAttributeComponent* AttributeComponent = Cast<URoguelikeAttributeComponent>(
+			OtherActor->GetComponentByClass(URoguelikeAttributeComponent::StaticClass()));
+
+		if (AttributeComponent)
+		{
+			AttributeComponent->ApplyHealthChange(-100.0f);
+		}
+	}
+	
 	Destroy();
 }
 

@@ -11,6 +11,7 @@ class USpringArmComponent;
 class URoguelikeInteractionComponent;
 class UAnimMontage;
 class ARoguelikeProjectile;
+class URoguelikeAttributeComponent;
 
 UCLASS()
 class ACTIONROGUELIKE_API ARoguelikeCharacter : public ACharacter
@@ -62,6 +63,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere);
 	URoguelikeInteractionComponent* InteractionComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components");
+	URoguelikeAttributeComponent* AttributeComp;
 	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

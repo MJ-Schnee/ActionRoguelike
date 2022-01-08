@@ -3,6 +3,7 @@
 
 #include "RoguelikeCharacter.h"
 
+#include "RoguelikeAttributeComponent.h"
 #include "RoguelikeInteractionComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -22,6 +23,8 @@ ARoguelikeCharacter::ARoguelikeCharacter()
 	CameraComp->SetupAttachment(SpringArmComp);
 
 	InteractionComp = CreateDefaultSubobject<URoguelikeInteractionComponent>(TEXT("InteractionComp"));
+
+	AttributeComp = CreateDefaultSubobject<URoguelikeAttributeComponent>(TEXT("AttributeComp"));
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 
