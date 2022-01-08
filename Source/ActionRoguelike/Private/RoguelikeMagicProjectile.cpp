@@ -14,7 +14,7 @@ ARoguelikeMagicProjectile::ARoguelikeMagicProjectile()
 void ARoguelikeMagicProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OtherActor)
+	if (OtherActor && OtherActor != GetInstigator())
 	{
 		URoguelikeAttributeComponent* AttributeComponent = Cast<URoguelikeAttributeComponent>(
 			OtherActor->GetComponentByClass(URoguelikeAttributeComponent::StaticClass()));
