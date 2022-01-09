@@ -104,24 +104,32 @@ void ARoguelikeCharacter::PrimaryInteract()
 
 void ARoguelikeCharacter::UseAbility_TimeElapsed(FName SpawnSocket, UClass* AbilityClass)
 {
-	// Raycast from camera to determine attack rotation adjustment for aim
 	FVector TraceStart = CameraComp->GetComponentLocation();
-	FVector TraceEnd = TraceStart + CameraComp->GetForwardVector() * 3000.0f;
+	FVector TraceEnd = TraceStart + GetControlRotation().Vector() * 5000.0f;
+
+	FCollisionShape Shape;
+	Shape.SetSphere(10.0f);
+	
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+
+	FCollisionObjectQueryParams ObjParams;
+	ObjParams.AddObjectTypesToQuery(ECC_WorldDynamic);
+	ObjParams.AddObjectTypesToQuery(ECC_WorldStatic);
+	ObjParams.AddObjectTypesToQuery(ECC_Pawn);
+
 	FHitResult Hit;
-	FVector HitLoc;
-	if (GetWorld()->LineTraceSingleByChannel(Hit, TraceStart, TraceEnd, ECC_Visibility))
+	if (GetWorld()->SweepSingleByObjectType(Hit, TraceStart, TraceEnd, FQuat::Identity, ObjParams, Shape, Params))
 	{
-		HitLoc = Hit.Location;
-	} else
-	{
-		HitLoc = TraceEnd;
+		// Override TraceEnd for determining impact point
+		TraceEnd = Hit.Location;
 	}
 
-	FVector RightHandLocation = GetMesh()->GetSocketLocation(SpawnSocket);
+	FVector HandLocation = GetMesh()->GetSocketLocation(SpawnSocket);
 
-	FRotator RotationToCrosshair = (HitLoc - RightHandLocation).Rotation();
+	FRotator RotationToCrosshair = (TraceEnd - HandLocation).Rotation();
 	
-	FTransform SpawnTransform = FTransform(RotationToCrosshair, RightHandLocation);
+	FTransform SpawnTransform = FTransform(RotationToCrosshair, HandLocation);
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;

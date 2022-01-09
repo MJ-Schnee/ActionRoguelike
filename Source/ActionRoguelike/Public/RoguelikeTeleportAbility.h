@@ -15,22 +15,24 @@ class ACTIONROGUELIKE_API ARoguelikeTeleportAbility : public ARoguelikeProjectil
 	GENERATED_BODY()
 
 protected:
-	UPROPERTY(EditAnywhere);
-	UParticleSystem* ExplosionEffect;
+	UPROPERTY(EditDefaultsOnly, Category = "Teleport")
+	float ExplosionDelay;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Teleport")
+	float TeleportDelay;
 	
 	FTimerHandle ExplosionEffectTimerHandle;
-	FTimerHandle TeleportPlayerTimerHandle;
 
-	UFUNCTION()
-	void OnSphereCompHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+	virtual void OnActorHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+	                FVector NormalImpulse, const FHitResult& Hit) override;
 	
 	UFUNCTION()
 	void TriggerExplosionEffect();
 	
 	UFUNCTION()
-	void TeleportPlayer();
+	void TeleportInstigator();
 	
-	virtual void BeginPlay() override;
+	virtual void PostInitializeComponents() override;
 
 public:
 	ARoguelikeTeleportAbility();

@@ -5,16 +5,15 @@
 
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
 
 ARoguelikeProjectile::ARoguelikeProjectile()
 {
-	// To improve performance, disable Tick() by default
-	PrimaryActorTick.bCanEverTick = false;
-	
- 	SphereComp = CreateDefaultSubobject<USphereComponent>("SphereComp");
-	RootComponent = SphereComp;
+	SphereComp = CreateDefaultSubobject<USphereComponent>("SphereComp");
 	SphereComp->SetCollisionProfileName("Projectile");
+	SphereComp->OnComponentHit.AddDynamic(this, &ARoguelikeProjectile::OnActorHit);
+	RootComponent = SphereComp;
 
 	EffectComp = CreateDefaultSubobject<UParticleSystemComponent>("EffectComp");
 	EffectComp->SetupAttachment(SphereComp);
@@ -26,9 +25,20 @@ ARoguelikeProjectile::ARoguelikeProjectile()
 	MovementComp->ProjectileGravityScale = 0.0f;
 }
 
-void ARoguelikeProjectile::BeginPlay()
+void ARoguelikeProjectile::OnActorHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+	FVector NormalImpulse, const FHitResult& Hit)
 {
-	Super::BeginPlay();
+	if (ensure(!IsPendingKill()))
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, this->GetTransform());
+
+		Destroy();
+	}
+}
+
+void ARoguelikeProjectile::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
 	
 	SphereComp->IgnoreActorWhenMoving(this->GetInstigator(), true);
 }

@@ -10,17 +10,6 @@
 ARoguelikeMagicProjectile::ARoguelikeMagicProjectile()
 {
 	SphereComp->OnComponentBeginOverlap.AddDynamic(this, &ARoguelikeMagicProjectile::OnActorOverlap);
-	SphereComp->OnComponentHit.AddDynamic(this, &ARoguelikeMagicProjectile::OnSphereCompHit);
-}
-
-void ARoguelikeMagicProjectile::OnSphereCompHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
-{
-	if (OtherActor && OtherActor != this->GetInstigator())
-	{
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, this->GetTransform());
-	}
-
-	Destroy();
 }
 
 void ARoguelikeMagicProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
