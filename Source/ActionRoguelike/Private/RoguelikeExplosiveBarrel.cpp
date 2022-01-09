@@ -4,9 +4,10 @@
 #include "RoguelikeExplosiveBarrel.h"
 
 #include "RoguelikeAttributeComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystemComponent.h"
 #include "PhysicsEngine/RadialForceComponent.h"
 
-// Sets default values
 ARoguelikeExplosiveBarrel::ARoguelikeExplosiveBarrel()
 {
 	StaticMeshComp = CreateDefaultSubobject<UStaticMeshComponent>("StaticMeshComp");
@@ -20,7 +21,6 @@ ARoguelikeExplosiveBarrel::ARoguelikeExplosiveBarrel()
 	RadialForceComp->ImpulseStrength = 100000.0f;
 }
 
-// Called when the game starts or when spawned
 void ARoguelikeExplosiveBarrel::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
@@ -42,7 +42,8 @@ void ARoguelikeExplosiveBarrel::OnHit(UPrimitiveComponent* HitComp, AActor* Othe
 			AttributeComponent->ApplyHealthChange(-100.0f);
 		}
 	}
-	
+
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, this->GetTransform());
+
 	Destroy();
 }
-

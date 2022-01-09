@@ -14,16 +14,17 @@ class ACTIONROGUELIKE_API ARoguelikeExplosiveBarrel : public AActor
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
 	ARoguelikeExplosiveBarrel();
 
 protected:
-
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* StaticMeshComp;
 
 	UPROPERTY(VisibleAnywhere)
 	URadialForceComponent* RadialForceComp;
+
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* ExplosionEffect;
 
 	virtual void PostInitializeComponents() override;
 
