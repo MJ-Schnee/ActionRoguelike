@@ -33,5 +33,8 @@ public:
 	// Add/subtract a specified amount of health to the actor, returns action success
 	UFUNCTION(BlueprintCallable, Category = "Attributes")
 	bool ApplyHealthChange(float Delta);
+
+	UFUNCTION(BlueprintCallable)
+	bool IsAlive() const;
 	
 };

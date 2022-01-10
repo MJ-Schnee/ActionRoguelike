@@ -35,6 +35,8 @@ void ARoguelikeCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
+	AttributeComp->OnHealthChanged.AddDynamic(this, &ARoguelikeCharacter::OnHealthChanged);
+
 	// Primary attack timer and spawn setup
 	FName RightHandSocket = "Muzzle_01";
 	UClass* PrimaryAttack = PrimaryAttackBP;
@@ -157,4 +159,14 @@ void ARoguelikeCharacter::TeleportAbility()
 	PlayAnimMontage(TeleportAbilityAnim);
 
 	GetWorldTimerManager().SetTimer(TimerHandle_TeleportAbility, TimerDelegate_TeleportAbility, 0.2f, false);
+}
+
+void ARoguelikeCharacter::OnHealthChanged(AActor* InstigatorActor, URoguelikeAttributeComponent* OwningComp,
+	float NewHealth, float Delta)
+{
+	if (NewHealth <= 0.0f && Delta < 0.0f)
+	{
+		APlayerController* PlayerController = Cast<APlayerController>(GetController()); 
+		DisableInput(PlayerController);
+	}
 }

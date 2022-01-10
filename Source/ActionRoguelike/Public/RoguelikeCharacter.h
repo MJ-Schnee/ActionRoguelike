@@ -19,6 +19,7 @@ class ACTIONROGUELIKE_API ARoguelikeCharacter : public ACharacter
 	GENERATED_BODY()
 
 protected:
+	
 	// Primary attack
 	UPROPERTY(EditAnywhere, Category="Attack")
 	TSubclassOf<ARoguelikeProjectile> PrimaryAttackBP;
@@ -50,6 +51,7 @@ protected:
 	FTimerHandle TimerHandle_TeleportAbility;
 
 public:
+	
 	// Sets default values for this character's properties
 	ARoguelikeCharacter();
 
@@ -89,7 +91,11 @@ protected:
 
 	void TeleportAbility();
 
+	UFUNCTION()
+	void OnHealthChanged(AActor* InstigatorActor, URoguelikeAttributeComponent* OwningComp, float NewHealth, float Delta);
+
 public:
+	
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 

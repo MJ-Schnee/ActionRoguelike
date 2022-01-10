@@ -18,3 +18,8 @@ bool URoguelikeAttributeComponent::ApplyHealthChange(float Delta)
 	return true;
 }
 
+bool URoguelikeAttributeComponent::IsAlive() const
+{
+	return Health > 0.0f;
+}
+
