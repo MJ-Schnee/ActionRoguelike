@@ -28,7 +28,6 @@ protected:
 	UAnimMontage* PrimaryAttackAnim;
 
 	FTimerDelegate TimerDelegate_PrimaryAttack;
-	FTimerHandle TimerHandle_PrimaryAttack;
 
 	// Black hole ability
 	UPROPERTY(EditAnywhere, Category="Attack")
@@ -38,7 +37,6 @@ protected:
 	UAnimMontage* BlackHoleAbilityAnim;
 	
 	FTimerDelegate TimerDelegate_BlackHoleAbility;
-	FTimerHandle TimerHandle_BlackHoleAbility;
 
 	// Teleport ability
 	UPROPERTY(EditAnywhere, Category="Attack")
@@ -48,7 +46,6 @@ protected:
 	UAnimMontage* TeleportAbilityAnim;
 	
 	FTimerDelegate TimerDelegate_TeleportAbility;
-	FTimerHandle TimerHandle_TeleportAbility;
 
 public:
 	
@@ -57,17 +54,20 @@ public:
 
 protected:
 
-	UPROPERTY(VisibleAnywhere);
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components");
 	USpringArmComponent* SpringArmComp;
 
-	UPROPERTY(VisibleAnywhere);
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components");
 	UCameraComponent* CameraComp;
 
-	UPROPERTY(VisibleAnywhere);
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components");
 	URoguelikeInteractionComponent* InteractionComp;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components");
 	URoguelikeAttributeComponent* AttributeComp;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Effects");
+	UParticleSystem* MuzzleFlash;
 	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

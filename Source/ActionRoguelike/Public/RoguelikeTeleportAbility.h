@@ -22,15 +22,14 @@ protected:
 	float TeleportDelay;
 	
 	FTimerHandle ExplosionEffectTimerHandle;
-
-	virtual void OnActorHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp,
-	                FVector NormalImpulse, const FHitResult& Hit) override;
 	
 	UFUNCTION()
-	void TriggerExplosionEffect();
+	virtual void Explode_Implementation() override;
 	
 	UFUNCTION()
 	void TeleportInstigator();
+
+	virtual void OnActorHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) override;
 	
 	virtual void PostInitializeComponents() override;
 

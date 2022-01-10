@@ -9,6 +9,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "RoguelikeProjectile.h"
+#include "Kismet/GameplayStatics.h"
 
 ARoguelikeCharacter::ARoguelikeCharacter()
 {
@@ -142,22 +143,34 @@ void ARoguelikeCharacter::UseAbility_TimeElapsed(FName SpawnSocket, UClass* Abil
 
 void ARoguelikeCharacter::PrimaryAttack()
 {
+	USceneComponent* CharacterMesh = GetMesh();
+	UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, CharacterMesh, "Muzzle_01");
+	
 	PlayAnimMontage(PrimaryAttackAnim);
 
+	FTimerHandle TimerHandle_PrimaryAttack;
 	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, TimerDelegate_PrimaryAttack, 0.2f, false);
 }
 
 void ARoguelikeCharacter::BlackHoleAbility()
 {
+	USceneComponent* CharacterMesh = GetMesh();
+	UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, CharacterMesh, "Muzzle_01");
+	
 	PlayAnimMontage(BlackHoleAbilityAnim);
 
+	FTimerHandle TimerHandle_BlackHoleAbility;
 	GetWorldTimerManager().SetTimer(TimerHandle_BlackHoleAbility, TimerDelegate_BlackHoleAbility, 0.2f, false);
 }
 
 void ARoguelikeCharacter::TeleportAbility()
 {
+	USceneComponent* CharacterMesh = GetMesh();
+	UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, CharacterMesh, "Muzzle_02");
+	
 	PlayAnimMontage(TeleportAbilityAnim);
 
+	FTimerHandle TimerHandle_TeleportAbility;
 	GetWorldTimerManager().SetTimer(TimerHandle_TeleportAbility, TimerDelegate_TeleportAbility, 0.2f, false);
 }
 

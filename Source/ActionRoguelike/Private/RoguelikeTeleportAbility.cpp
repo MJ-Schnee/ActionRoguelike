@@ -20,7 +20,7 @@ void ARoguelikeTeleportAbility::PostInitializeComponents()
 	Super::PostInitializeComponents();
 	
 	GetWorldTimerManager().SetTimer(ExplosionEffectTimerHandle, this,
-		&ARoguelikeTeleportAbility::TriggerExplosionEffect, ExplosionDelay);
+		&ARoguelikeTeleportAbility::Explode, ExplosionDelay);
 }
 
 void ARoguelikeTeleportAbility::OnActorHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
@@ -28,11 +28,11 @@ void ARoguelikeTeleportAbility::OnActorHit(UPrimitiveComponent* HitComp, AActor*
 	if (OtherActor != this->GetInstigator())
 	{
 		GetWorldTimerManager().ClearTimer(ExplosionEffectTimerHandle);
-		TriggerExplosionEffect();	
+		Explode();	
 	}
 }
 
-void ARoguelikeTeleportAbility::TriggerExplosionEffect()
+void ARoguelikeTeleportAbility::Explode_Implementation()
 {
 	EffectComp->DeactivateSystem();
 	MovementComp->StopMovementImmediately();

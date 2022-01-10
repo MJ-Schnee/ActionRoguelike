@@ -4,12 +4,34 @@
 #include "RoguelikeMagicProjectile.h"
 
 #include "RoguelikeAttributeComponent.h"
+#include "Components/AudioComponent.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 ARoguelikeMagicProjectile::ARoguelikeMagicProjectile()
 {
 	SphereComp->OnComponentBeginOverlap.AddDynamic(this, &ARoguelikeMagicProjectile::OnActorOverlap);
+
+	FlightSoundComp = CreateDefaultSubobject<UAudioComponent>("FlightSoundComp");
+	FlightSoundComp->SetupAttachment(SphereComp);
+
+	CameraShakeInnerRadius = 100.0f;
+	CameraShakeOuterRadius = 800.0f;
+}
+
+void ARoguelikeMagicProjectile::Explode_Implementation()
+{
+	if (ensure(!IsPendingKill()))
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, GetActorLocation());
+
+		FlightSoundComp->Stop();
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSound, GetActorLocation(), GetActorRotation());
+
+		UGameplayStatics::PlayWorldCameraShake(GetWorld(), CameraShake, GetActorLocation(), CameraShakeInnerRadius, CameraShakeOuterRadius);
+
+		Destroy();
+	}
 }
 
 void ARoguelikeMagicProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -23,8 +45,8 @@ void ARoguelikeMagicProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedCo
 		if (AttributeComponent)
 		{
 			AttributeComponent->ApplyHealthChange(-20.0f);
-
-			Destroy();
+			
+			Explode();
 		}
 	}
 }
