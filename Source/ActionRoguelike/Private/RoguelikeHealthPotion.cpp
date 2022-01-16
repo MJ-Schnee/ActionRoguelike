@@ -23,7 +23,7 @@ void ARoguelikeHealthPotion::Interact_Implementation(APawn* InstigatorPawn)
 	
 			if (bHealedInstigator)
 			{
-				Super::Interact_Implementation(InstigatorPawn);
+				ActivateItemCooldown();
 			}
 		}
 	}

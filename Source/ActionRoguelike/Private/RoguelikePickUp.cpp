@@ -11,17 +11,21 @@ ARoguelikePickUp::ARoguelikePickUp()
 	RespawnTime = 10.0f;
 }
 
-void ARoguelikePickUp::Interact_Implementation(APawn* InstigatorPawn)
+void ARoguelikePickUp::SetItemVisible(bool Visible)
 {
-	MeshComp->SetVisibility(false);
-	MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	RootComponent->SetVisibility(Visible, true);
+	SetActorEnableCollision(Visible);
+}
 
+void ARoguelikePickUp::ActivateItemCooldown()
+{
+	SetItemVisible(false);
+	
 	GetWorldTimerManager().SetTimer(RespawnTimerHandle, this,
 		&ARoguelikePickUp::RespawnItem, RespawnTime);
 }
 
 void ARoguelikePickUp::RespawnItem()
 {
-	MeshComp->SetVisibility(true);
-	MeshComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	SetItemVisible(true);
 }

@@ -12,30 +12,16 @@ URoguelikeAttributeComponent::URoguelikeAttributeComponent()
 
 bool URoguelikeAttributeComponent::ApplyHealthChange(float Delta)
 {
-	if (FMath::IsNearlyEqual(Health, MaxHealth) && Delta > 0.0f)
-	{
-		return false;
-	}
-	
-	if (FMath::IsNearlyEqual(Health, 0.0f) && Delta < 0.0f)
-	{
-		return false;
-	}
-	
-	Health += Delta;
+	float OldHealth = Health;
 
-	if (Health < 0.0f)
-	{
-		Health = 0.0f;
-	}
-	else if (Health > MaxHealth)
-	{
-		Health = MaxHealth;
-	}
+	Health = FMath::Clamp(Health + Delta, 0.0f, MaxHealth);
 
-	OnHealthChanged.Broadcast(nullptr, this, Health, Delta);
+	float TrueDelta = Health - OldHealth;
 
-	return true;
+	// FIX ME: InstigatorActor parameter is nullptr
+	OnHealthChanged.Broadcast(nullptr, this, Health, TrueDelta);
+
+	return !FMath::IsNearlyZero(TrueDelta);
 }
 
 bool URoguelikeAttributeComponent::IsAlive() const

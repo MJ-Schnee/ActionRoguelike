@@ -6,9 +6,6 @@
 #include "RoguelikePickUp.h"
 #include "RoguelikeHealthPotion.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class ACTIONROGUELIKE_API ARoguelikeHealthPotion : public ARoguelikePickUp
 {
@@ -22,7 +19,8 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Health")
 	float HealAmount;
+
+public:
 	
 	virtual void Interact_Implementation(APawn* InstigatorPawn) override;
-	
 };

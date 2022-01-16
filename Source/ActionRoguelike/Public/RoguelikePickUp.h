@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "RoguelikeGameplayInterface.h"
-#include "GameFramework/Actor.h"
 #include "RoguelikePickUp.generated.h"
 
 UCLASS(Abstract)
@@ -26,9 +25,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Respawn")
 	float RespawnTime;
 
-	virtual void Interact_Implementation(APawn* InstigatorPawn) override;
+	virtual void SetItemVisible(bool Visible);
+
+	virtual void ActivateItemCooldown();
 
 	UFUNCTION()
 	virtual void RespawnItem();
-
 };
