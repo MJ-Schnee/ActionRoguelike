@@ -3,19 +3,12 @@
 
 #include "AI/RoguelikeAIController.h"
 
-#include "BehaviorTree/BlackboardComponent.h"
-
 void ARoguelikeAIController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	RunBehaviorTree(BehaviorTree);
-	
-	APawn* Player = GetWorld()->GetFirstPlayerController()->GetPawn();
-	if (Player)
+	if (ensureMsgf(BehaviorTree, TEXT("Behavior Tree is nullptr! Please assign BehaviorTree in AI Controller.")))
 	{
-		GetBlackboardComponent()->SetValueAsVector("MoveToLocation", Player->GetActorLocation());
-		
-		GetBlackboardComponent()->SetValueAsObject("TargetActor", Player);
+		RunBehaviorTree(BehaviorTree);	
 	}
 }

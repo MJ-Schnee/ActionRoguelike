@@ -17,6 +17,8 @@ ARoguelikeMagicProjectile::ARoguelikeMagicProjectile()
 
 	CameraShakeInnerRadius = 100.0f;
 	CameraShakeOuterRadius = 800.0f;
+
+	Damage = 20.f;
 }
 
 void ARoguelikeMagicProjectile::Explode_Implementation()
@@ -44,7 +46,7 @@ void ARoguelikeMagicProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedCo
 
 		if (AttributeComponent)
 		{
-			AttributeComponent->ApplyHealthChange(-20.0f);
+			AttributeComponent->ApplyHealthChange(-Damage);
 			
 			Explode();
 		}

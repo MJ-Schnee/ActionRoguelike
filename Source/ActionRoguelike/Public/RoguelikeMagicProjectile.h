@@ -27,6 +27,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "CameraShake")
 	TSubclassOf<UCameraShakeBase> CameraShake;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Damage")
+	float Damage;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "CameraShake")
 	float CameraShakeInnerRadius;
 
