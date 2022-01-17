@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "RoguelikeAICharacter.generated.h"
 
+class URoguelikeAttributeComponent;
 class UPawnSensingComponent;
 
 UCLASS()
@@ -13,17 +14,22 @@ class ACTIONROGUELIKE_API ARoguelikeAICharacter : public ACharacter
 {
 	GENERATED_BODY()
 
-public:
-	// Sets default values for this character's properties
-	ARoguelikeAICharacter();
-
 protected:
-
-	virtual void PostInitializeComponents() override;
 
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	UPawnSensingComponent* PawnSensingComp;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components");
+	URoguelikeAttributeComponent* AttributeComp;
+
 	UFUNCTION()
 	void OnPawnSeen(APawn* Pawn);
+
+	UFUNCTION()
+	void OnHealthChanged(AActor* InstigatorActor, URoguelikeAttributeComponent* OwningComp, float NewHealth, float Delta);
+
+	virtual void PostInitializeComponents() override;
+
+public:
+	ARoguelikeAICharacter();
 };

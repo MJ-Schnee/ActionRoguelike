@@ -5,6 +5,7 @@
 
 #include "AIController.h"
 #include "DrawDebugHelpers.h"
+#include "RoguelikeAttributeComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Perception/PawnSensingComponent.h"
 
@@ -12,6 +13,10 @@
 ARoguelikeAICharacter::ARoguelikeAICharacter()
 {
  	PawnSensingComp = CreateDefaultSubobject<UPawnSensingComponent>("PawnSensingComp");
+	
+	AttributeComp = CreateDefaultSubobject<URoguelikeAttributeComponent>(TEXT("AttributeComp"));
+
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 }
 
 void ARoguelikeAICharacter::PostInitializeComponents()
@@ -19,6 +24,8 @@ void ARoguelikeAICharacter::PostInitializeComponents()
 	Super::PostInitializeComponents();
 
 	PawnSensingComp->OnSeePawn.AddDynamic(this, &ARoguelikeAICharacter::OnPawnSeen);
+
+	AttributeComp->OnHealthChanged.AddDynamic(this, &ARoguelikeAICharacter::OnHealthChanged);
 }
 
 void ARoguelikeAICharacter::OnPawnSeen(APawn* Pawn)
@@ -29,7 +36,15 @@ void ARoguelikeAICharacter::OnPawnSeen(APawn* Pawn)
 		UBlackboardComponent* BBComp = AIController->GetBlackboardComponent();
 
 		BBComp->SetValueAsObject("TargetActor", Pawn);
+	}
+}
 
-		DrawDebugString(GetWorld(), GetActorLocation(), "PLAYER SPOTTED", nullptr, FColor::White, 4.0f, true);
+void ARoguelikeAICharacter::OnHealthChanged(AActor* InstigatorActor, URoguelikeAttributeComponent* OwningComp,
+	float NewHealth, float Delta)
+{
+	// fixme: Placeholder code
+	if (NewHealth <= 0.0f)
+	{
+		Destroy();
 	}
 }
