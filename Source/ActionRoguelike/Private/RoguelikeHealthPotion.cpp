@@ -19,7 +19,7 @@ void ARoguelikeHealthPotion::Interact_Implementation(APawn* InstigatorPawn)
 	
 		if (AttributeComponent)
 		{
-			const bool bHealedInstigator = AttributeComponent->ApplyHealthChange(HealAmount);
+			const bool bHealedInstigator = AttributeComponent->ApplyHealthChange(this, HealAmount);
 	
 			if (bHealedInstigator)
 			{

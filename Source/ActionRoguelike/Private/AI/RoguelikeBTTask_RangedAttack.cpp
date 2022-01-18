@@ -4,8 +4,14 @@
 #include "AI/RoguelikeBTTask_RangedAttack.h"
 
 #include "AIController.h"
+#include "RoguelikeAttributeComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/Character.h"
+
+URoguelikeBTTask_RangedAttack::URoguelikeBTTask_RangedAttack()
+{
+	MaxBulletSpread = 5.0f;
+}
 
 EBTNodeResult::Type URoguelikeBTTask_RangedAttack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
@@ -26,11 +32,21 @@ EBTNodeResult::Type URoguelikeBTTask_RangedAttack::ExecuteTask(UBehaviorTreeComp
 			return EBTNodeResult::Failed;
 		}
 
+		if (!URoguelikeAttributeComponent::IsActorAlive(TargetActor))
+		{
+			return EBTNodeResult::Failed;
+		}
+
 		FVector AimDirection = TargetActor->GetActorLocation() - MuzzleLocation;
 		FRotator MuzzleRotation = AimDirection.Rotation();
 
+		// Random bullet spread
+		MuzzleRotation.Pitch += FMath::RandRange(0.0f, MaxBulletSpread);
+		MuzzleRotation.Yaw += FMath::RandRange(-MaxBulletSpread, MaxBulletSpread);
+
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		SpawnParams.Instigator = AICharacter;
 
 		AActor* Projectile = GetWorld()->SpawnActor<AActor>(ProjectileClass, MuzzleLocation, MuzzleRotation, SpawnParams);
 

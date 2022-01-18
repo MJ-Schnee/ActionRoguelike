@@ -39,7 +39,7 @@ void ARoguelikeExplosiveBarrel::OnHit(UPrimitiveComponent* HitComp, AActor* Othe
 
 		if (AttributeComponent)
 		{
-			AttributeComponent->ApplyHealthChange(-100.0f);
+			AttributeComponent->ApplyHealthChange(this, -100.0f);
 		}
 	}
 

@@ -20,6 +20,12 @@ public:
 
 	URoguelikeAttributeComponent();
 
+	UFUNCTION(BlueprintCallable, Category = "Attributes")
+	static URoguelikeAttributeComponent* GetAttributes(AActor* FromActor);
+
+	UFUNCTION(BlueprintCallable, Category = "Attributes", meta = (DisplayName = "IsAlive"))
+	static bool IsActorAlive(AActor* Actor);
+
 protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes")
@@ -35,9 +41,8 @@ public:
 
 	// Add/subtract a specified amount of health to the actor, returns action success
 	UFUNCTION(BlueprintCallable, Category = "Attributes")
-	bool ApplyHealthChange(float Delta);
+	bool ApplyHealthChange(AActor* InstigatorActor, float Delta);
 
 	UFUNCTION(BlueprintCallable)
 	bool IsAlive() const;
-	
 };

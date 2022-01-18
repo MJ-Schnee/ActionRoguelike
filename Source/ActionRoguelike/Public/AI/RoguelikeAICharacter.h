@@ -14,6 +14,10 @@ class ACTIONROGUELIKE_API ARoguelikeAICharacter : public ACharacter
 {
 	GENERATED_BODY()
 
+public:
+	
+	ARoguelikeAICharacter();
+
 protected:
 
 	UPROPERTY(VisibleAnywhere, Category = "Components")
@@ -22,14 +26,13 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components");
 	URoguelikeAttributeComponent* AttributeComp;
 
+	virtual void PostInitializeComponents() override;
+
+	void SetTargetActor(AActor* NewTarget);
+
 	UFUNCTION()
 	void OnPawnSeen(APawn* Pawn);
 
 	UFUNCTION()
 	void OnHealthChanged(AActor* InstigatorActor, URoguelikeAttributeComponent* OwningComp, float NewHealth, float Delta);
-
-	virtual void PostInitializeComponents() override;
-
-public:
-	ARoguelikeAICharacter();
 };

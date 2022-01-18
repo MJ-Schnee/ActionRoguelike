@@ -46,7 +46,7 @@ void ARoguelikeMagicProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedCo
 
 		if (AttributeComponent)
 		{
-			AttributeComponent->ApplyHealthChange(-Damage);
+			AttributeComponent->ApplyHealthChange(GetInstigator(), -Damage);
 			
 			Explode();
 		}

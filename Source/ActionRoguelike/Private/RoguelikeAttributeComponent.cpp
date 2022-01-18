@@ -10,7 +10,28 @@ URoguelikeAttributeComponent::URoguelikeAttributeComponent()
 	MaxHealth = 100.0f;
 }
 
-bool URoguelikeAttributeComponent::ApplyHealthChange(float Delta)
+URoguelikeAttributeComponent* URoguelikeAttributeComponent::GetAttributes(AActor* FromActor)
+{
+	if (FromActor)
+	{
+		return Cast<URoguelikeAttributeComponent>(FromActor->GetComponentByClass(URoguelikeAttributeComponent::StaticClass()));
+	}
+	
+	return nullptr;
+}
+
+bool URoguelikeAttributeComponent::IsActorAlive(AActor* Actor)
+{
+	URoguelikeAttributeComponent* AttributeComp = GetAttributes(Actor);
+	if (AttributeComp)
+	{
+		return AttributeComp->IsAlive();
+	}
+
+	return false;
+}
+
+bool URoguelikeAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Delta)
 {
 	float OldHealth = Health;
 
@@ -19,7 +40,7 @@ bool URoguelikeAttributeComponent::ApplyHealthChange(float Delta)
 	float TrueDelta = Health - OldHealth;
 
 	// FIX ME: InstigatorActor parameter is nullptr
-	OnHealthChanged.Broadcast(nullptr, this, Health, TrueDelta);
+	OnHealthChanged.Broadcast(InstigatorActor, this, Health, TrueDelta);
 
 	return !FMath::IsNearlyZero(TrueDelta);
 }

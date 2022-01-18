@@ -4,6 +4,7 @@
 #include "AI/RoguelikeAICharacter.h"
 
 #include "AIController.h"
+#include "BrainComponent.h"
 #include "DrawDebugHelpers.h"
 #include "RoguelikeAttributeComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
@@ -28,23 +29,47 @@ void ARoguelikeAICharacter::PostInitializeComponents()
 	AttributeComp->OnHealthChanged.AddDynamic(this, &ARoguelikeAICharacter::OnHealthChanged);
 }
 
-void ARoguelikeAICharacter::OnPawnSeen(APawn* Pawn)
+void ARoguelikeAICharacter::SetTargetActor(AActor* NewTarget)
 {
-	AAIController* AIController = Cast<AAIController>(GetController());
+	AAIController* AIController = GetController<AAIController>();
 	if (AIController)
 	{
-		UBlackboardComponent* BBComp = AIController->GetBlackboardComponent();
-
-		BBComp->SetValueAsObject("TargetActor", Pawn);
+		AIController->GetBlackboardComponent()->SetValueAsObject("TargetActor", NewTarget);
 	}
+}
+
+void ARoguelikeAICharacter::OnPawnSeen(APawn* Pawn)
+{
+	SetTargetActor(Pawn);
 }
 
 void ARoguelikeAICharacter::OnHealthChanged(AActor* InstigatorActor, URoguelikeAttributeComponent* OwningComp,
 	float NewHealth, float Delta)
 {
-	// fixme: Placeholder code
-	if (NewHealth <= 0.0f)
+	if (Delta < 0.0f)
 	{
-		Destroy();
+		if (NewHealth >= 0.0f)
+		{
+			GetMesh()->SetScalarParameterValueOnMaterials("TimeToHit", GetWorld()->TimeSeconds);
+		}
+
+		if (NewHealth <= 0.0f)
+		{
+			if (InstigatorActor != this)
+			{
+				SetTargetActor(InstigatorActor);
+			}
+		
+			AAIController* AIController = GetController<AAIController>();
+			if (AIController)
+			{
+				AIController->GetBrainComponent()->StopLogic("Killed");
+			}
+
+			GetMesh()->SetCollisionProfileName("Ragdoll");
+			GetMesh()->SetAllBodiesSimulatePhysics(true);
+		
+			SetLifeSpan(10.0f);
+		}
 	}
 }

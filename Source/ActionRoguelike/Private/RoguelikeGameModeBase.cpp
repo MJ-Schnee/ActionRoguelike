@@ -24,6 +24,32 @@ void ARoguelikeGameModeBase::StartPlay()
 
 void ARoguelikeGameModeBase::SpawnBotTimerElapsed()
 {
+	int32 NumBotsAlive = 0;
+	for (TActorIterator<ARoguelikeAICharacter> Iterator(GetWorld()); Iterator; ++Iterator)
+	{
+		ARoguelikeAICharacter* Bot = *Iterator;
+
+		URoguelikeAttributeComponent* AttributeComp = URoguelikeAttributeComponent::GetAttributes(Bot);
+		if (ensure(AttributeComp) && AttributeComp->IsAlive())
+		{
+			NumBotsAlive++;
+		}
+	}
+
+	UE_LOG(LogTemp, Log, TEXT("Num alive bots: %i"), NumBotsAlive);
+
+	float MaxBotCount = 10.0f;
+	if (DifficultyCurve)
+	{
+		MaxBotCount = DifficultyCurve->GetFloatValue(GetWorld()->GetTimeSeconds());
+	}
+	
+	if (NumBotsAlive >= MaxBotCount)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Bots at maximum capacity. Skipping bot spawn"));
+		return;
+	}
+	
 	 UEnvQueryInstanceBlueprintWrapper* QueryInstance = UEnvQueryManager::RunEQSQuery(this,
 	 	SpawnBotQuery, this, EEnvQueryRunMode::RandomBest5Pct, nullptr);
 
@@ -40,31 +66,6 @@ void ARoguelikeGameModeBase::OnQueryCompleted(UEnvQueryInstanceBlueprintWrapper*
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Spawn Bot EQS query failed!"));
 		return;	
-	}
-
-	int32 NumBotsAlive = 0;
-	for (TActorIterator<ARoguelikeAICharacter> Iterator(GetWorld()); Iterator; ++Iterator)
-	{
-		ARoguelikeAICharacter* Bot = *Iterator;
-
-		URoguelikeAttributeComponent* AttributeComp = Cast<URoguelikeAttributeComponent>(
-			Bot->GetComponentByClass(URoguelikeAttributeComponent::StaticClass()));
-
-		if (AttributeComp && AttributeComp->IsAlive())
-		{
-			NumBotsAlive++;
-		}
-	}
-
-	float MaxBotCount = 10.0f;
-	if (DifficultyCurve)
-	{
-		MaxBotCount = DifficultyCurve->GetFloatValue(GetWorld()->GetTimeSeconds());
-	}
-	
-	if (NumBotsAlive >= MaxBotCount)
-	{
-		return;
 	}
 	
 	TArray<FVector> SpawnLocations = QueryInstance->GetResultsAsLocations();
