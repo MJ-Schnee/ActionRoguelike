@@ -31,6 +31,16 @@ bool URoguelikeAttributeComponent::IsActorAlive(AActor* Actor)
 	return false;
 }
 
+float URoguelikeAttributeComponent::GetMaxHealth()
+{
+	return MaxHealth;
+}
+
+float URoguelikeAttributeComponent::GetHealth()
+{
+	return Health;
+}
+
 bool URoguelikeAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Delta)
 {
 	float OldHealth = Health;
@@ -39,7 +49,6 @@ bool URoguelikeAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, fl
 
 	float TrueDelta = Health - OldHealth;
 
-	// FIX ME: InstigatorActor parameter is nullptr
 	OnHealthChanged.Broadcast(InstigatorActor, this, Health, TrueDelta);
 
 	return !FMath::IsNearlyZero(TrueDelta);
