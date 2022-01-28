@@ -7,7 +7,9 @@
 #include "BrainComponent.h"
 #include "DrawDebugHelpers.h"
 #include "RoguelikeAttributeComponent.h"
+#include "RoguelikeWorldUserWidget.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Blueprint/UserWidget.h"
 #include "Perception/PawnSensingComponent.h"
 
 // Sets default values
@@ -48,6 +50,16 @@ void ARoguelikeAICharacter::OnHealthChanged(AActor* InstigatorActor, URoguelikeA
 {
 	if (Delta < 0.0f)
 	{
+		if (ActiveHealthBar == nullptr)
+		{
+			ActiveHealthBar = CreateWidget<URoguelikeWorldUserWidget>(GetWorld(), HealthBarWidgetClass);
+			if (ActiveHealthBar)
+			{
+				ActiveHealthBar->AttachedActor = this;
+				ActiveHealthBar->AddToViewport();
+			}	
+		}
+		
 		if (NewHealth >= 0.0f)
 		{
 			GetMesh()->SetScalarParameterValueOnMaterials("TimeToHit", GetWorld()->TimeSeconds);

@@ -8,6 +8,7 @@
 
 class URoguelikeAttributeComponent;
 class UPawnSensingComponent;
+class URoguelikeWorldUserWidget;
 
 UCLASS()
 class ACTIONROGUELIKE_API ARoguelikeAICharacter : public ACharacter
@@ -25,6 +26,11 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components");
 	URoguelikeAttributeComponent* AttributeComp;
+
+	URoguelikeWorldUserWidget* ActiveHealthBar;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI");
+	TSubclassOf<UUserWidget> HealthBarWidgetClass;
 
 	virtual void PostInitializeComponents() override;
 
