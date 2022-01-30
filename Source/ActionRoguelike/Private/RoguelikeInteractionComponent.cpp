@@ -6,6 +6,10 @@
 #include "DrawDebugHelpers.h"
 #include "RoguelikeGameplayInterface.h"
 
+
+static TAutoConsoleVariable<bool> CVarDrawDebug(TEXT("rl.DrawDebug"), false,
+	TEXT("Enables drawing debug lines for interaction component."), ECVF_Cheat);
+
 URoguelikeInteractionComponent::URoguelikeInteractionComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
@@ -36,10 +40,15 @@ void URoguelikeInteractionComponent::PrimaryInteract()
 		ObjectQueryParams, Shape);
 
 	FColor DebugColor = bBlockingHit ? FColor::Green : FColor::Red;
+
+	bool bDrawDebug = CVarDrawDebug.GetValueOnGameThread();
 	
 	for (FHitResult Hit : Hits)
 	{
-		DrawDebugSphere(GetWorld(), Hit.ImpactPoint, ShapeRadius, 16, DebugColor, false, 2.0f);
+		if (bDrawDebug)
+		{
+			DrawDebugSphere(GetWorld(), Hit.ImpactPoint, ShapeRadius, 16, DebugColor, false, 2.0f);	
+		}
 		
 		if (AActor* HitActor = Hit.GetActor())
 		{
@@ -53,5 +62,8 @@ void URoguelikeInteractionComponent::PrimaryInteract()
 		}
 	}
 
-	DrawDebugLine(GetWorld(), SweepStart, SweepEnd, DebugColor, false, 2.0f, 0, 2.0f);
+	if (bDrawDebug)
+	{
+		DrawDebugLine(GetWorld(), SweepStart, SweepEnd, DebugColor, false, 2.0f, 0, 2.0f);	
+	}
 }

@@ -5,9 +5,13 @@
 
 #include "EngineUtils.h"
 #include "RoguelikeAttributeComponent.h"
+#include "RoguelikeCharacter.h"
 #include "AI/RoguelikeAICharacter.h"
 #include "EnvironmentQuery/EnvQueryManager.h"
 
+
+static TAutoConsoleVariable<bool> CVarSpawnBots(TEXT("rl.SpawnBots"), true,
+	TEXT("Enable spawning of bots via timer."), ECVF_Cheat);
 
 ARoguelikeGameModeBase::ARoguelikeGameModeBase()
 {
@@ -22,8 +26,32 @@ void ARoguelikeGameModeBase::StartPlay()
 		SpawnTimerInterval, true);
 }
 
+void ARoguelikeGameModeBase::OnActorKilled(AActor* VictimActor, AActor* KillerActor)
+{
+	UE_LOG(LogTemp, Log, TEXT("OnActorKilled: Victim: %s, Killer: %s"), *GetNameSafe(VictimActor), *GetNameSafe(KillerActor));
+	
+	ARoguelikeCharacter* Player = Cast<ARoguelikeCharacter>(VictimActor);
+	if (Player)
+	{
+		FTimerHandle RespawnDelayTimerHandle;
+		
+		FTimerDelegate Delegate;
+		Delegate.BindUFunction(this, "RespawnPlayerElapsed", Player->GetController());
+
+		float RespawnDelay = 5.f;
+		GetWorldTimerManager().SetTimer(RespawnDelayTimerHandle, Delegate, RespawnDelay, false);
+	}
+}
+
 void ARoguelikeGameModeBase::SpawnBotTimerElapsed()
 {
+	if (!CVarSpawnBots.GetValueOnGameThread())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Bot spawning has been disabled via cvar 'CVarSpawnBots'"));
+		
+		return;
+	}
+	
 	int32 NumBotsAlive = 0;
 	for (TActorIterator<ARoguelikeAICharacter> Iterator(GetWorld()); Iterator; ++Iterator)
 	{
@@ -73,5 +101,14 @@ void ARoguelikeGameModeBase::OnQueryCompleted(UEnvQueryInstanceBlueprintWrapper*
 	if (SpawnLocations.IsValidIndex(0))
 	{
 		GetWorld()->SpawnActor<AActor>(MinionClass, SpawnLocations[0], FRotator::ZeroRotator);
+	}
+}
+
+void ARoguelikeGameModeBase::RespawnPlayerElapsed(AController* Controller)
+{
+	if (ensure(Controller))
+	{
+		Controller->UnPossess();
+		RestartPlayer(Controller);
 	}
 }

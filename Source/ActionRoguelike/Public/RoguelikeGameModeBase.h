@@ -15,6 +15,14 @@ class ACTIONROGUELIKE_API ARoguelikeGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 
+public:
+
+	ARoguelikeGameModeBase();
+	
+	virtual void StartPlay() override;
+
+	virtual void OnActorKilled(AActor* VictimActor, AActor* KillerActor);
+
 protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
@@ -37,9 +45,6 @@ protected:
 	UFUNCTION()
 	void OnQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstance, EEnvQueryStatus::Type QueryStatus);
 
-public:
-
-	ARoguelikeGameModeBase();
-	
-	virtual void StartPlay() override;	
+	UFUNCTION()
+	void RespawnPlayerElapsed(AController* Controller);
 };

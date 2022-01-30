@@ -3,7 +3,7 @@
 
 #include "RoguelikeMagicProjectile.h"
 
-#include "RoguelikeAttributeComponent.h"
+#include "RoguelikeGameplayFunctionLibrary.h"
 #include "Components/AudioComponent.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -41,13 +41,8 @@ void ARoguelikeMagicProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedCo
 {
 	if (OtherActor && OtherActor != GetInstigator())
 	{
-		URoguelikeAttributeComponent* AttributeComponent = Cast<URoguelikeAttributeComponent>(
-			OtherActor->GetComponentByClass(URoguelikeAttributeComponent::StaticClass()));
-
-		if (AttributeComponent)
+		if (URoguelikeGameplayFunctionLibrary::ApplyDirectionalDamage(GetInstigator(), OtherActor, Damage, SweepResult))
 		{
-			AttributeComponent->ApplyHealthChange(GetInstigator(), -Damage);
-			
 			Explode();
 		}
 	}

@@ -10,6 +10,8 @@
 #include "RoguelikeWorldUserWidget.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Perception/PawnSensingComponent.h"
 
 // Sets default values
@@ -20,6 +22,9 @@ ARoguelikeAICharacter::ARoguelikeAICharacter()
 	AttributeComp = CreateDefaultSubobject<URoguelikeAttributeComponent>(TEXT("AttributeComp"));
 
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Ignore);
+	GetMesh()->SetGenerateOverlapEvents(true);
 }
 
 void ARoguelikeAICharacter::PostInitializeComponents()
@@ -65,6 +70,7 @@ void ARoguelikeAICharacter::OnHealthChanged(AActor* InstigatorActor, URoguelikeA
 			GetMesh()->SetScalarParameterValueOnMaterials("TimeToHit", GetWorld()->TimeSeconds);
 		}
 
+		// Killed
 		if (NewHealth <= 0.0f)
 		{
 			if (InstigatorActor != this)
@@ -80,6 +86,9 @@ void ARoguelikeAICharacter::OnHealthChanged(AActor* InstigatorActor, URoguelikeA
 
 			GetMesh()->SetCollisionProfileName("Ragdoll");
 			GetMesh()->SetAllBodiesSimulatePhysics(true);
+
+			GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			GetCharacterMovement()->DisableMovement();
 		
 			SetLifeSpan(10.0f);
 		}
