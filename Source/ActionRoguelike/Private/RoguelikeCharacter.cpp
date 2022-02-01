@@ -3,6 +3,7 @@
 
 #include "RoguelikeCharacter.h"
 
+#include "DrawDebugHelpers.h"
 #include "RoguelikeAttributeComponent.h"
 #include "RoguelikeInteractionComponent.h"
 #include "Camera/CameraComponent.h"
@@ -10,6 +11,9 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "RoguelikeProjectile.h"
 #include "Kismet/GameplayStatics.h"
+
+static TAutoConsoleVariable<bool> CVarDrawDebugAttack(TEXT("rl.DrawDebugAttack"), false,
+	TEXT("Enables drawing debug lines for interaction component."), ECVF_Cheat);
 
 ARoguelikeCharacter::ARoguelikeCharacter()
 {
@@ -111,7 +115,8 @@ void ARoguelikeCharacter::UseAbility_TimeElapsed(FName SpawnSocket, UClass* Abil
 	FVector TraceEnd = TraceStart + GetControlRotation().Vector() * 5000.0f;
 
 	FCollisionShape Shape;
-	Shape.SetSphere(10.0f);
+	float ShapeRadius = 20.0f;
+	Shape.SetSphere(ShapeRadius);
 	
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
@@ -120,12 +125,31 @@ void ARoguelikeCharacter::UseAbility_TimeElapsed(FName SpawnSocket, UClass* Abil
 	ObjParams.AddObjectTypesToQuery(ECC_WorldDynamic);
 	ObjParams.AddObjectTypesToQuery(ECC_WorldStatic);
 	ObjParams.AddObjectTypesToQuery(ECC_Pawn);
-
-	FHitResult Hit;
-	if (GetWorld()->SweepSingleByObjectType(Hit, TraceStart, TraceEnd, FQuat::Identity, ObjParams, Shape, Params))
+	
+	bool bDrawDebugAttack = CVarDrawDebugAttack.GetValueOnGameThread();
+	FColor DebugColor = FColor::Green;
+	TArray<FHitResult> Hits;
+	if (GetWorld()->SweepMultiByObjectType(Hits, TraceStart, TraceEnd, FQuat::Identity, ObjParams, Shape, Params))
 	{
-		// Override TraceEnd for determining impact point
-		TraceEnd = Hit.Location;
+		for (FHitResult Hit : Hits)
+		{
+			if (bDrawDebugAttack)
+			{
+				DrawDebugLine(GetWorld(), TraceStart, Hit.ImpactPoint, DebugColor, false, 2.0f, 0, 2.0f);
+				DrawDebugSphere(GetWorld(), Hit.Location, ShapeRadius, 16, DebugColor, false, 2.0f);	
+			}
+			
+			// Dismiss player spawned projectiles
+			ARoguelikeProjectile* Projectile = Cast<ARoguelikeProjectile>(Hit.Actor);
+			bool bPlayerProjectile = Projectile != nullptr &&
+									 Cast<ARoguelikeCharacter>(Projectile->GetInstigator()) != nullptr;
+			if (!bPlayerProjectile)
+			{
+				// Override TraceEnd for determining impact point
+				TraceEnd = Hit.ImpactPoint;
+				break;
+			}
+		}
 	}
 
 	FVector HandLocation = GetMesh()->GetSocketLocation(SpawnSocket);

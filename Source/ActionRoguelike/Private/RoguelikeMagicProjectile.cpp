@@ -6,11 +6,14 @@
 #include "RoguelikeGameplayFunctionLibrary.h"
 #include "Components/AudioComponent.h"
 #include "Components/SphereComponent.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 ARoguelikeMagicProjectile::ARoguelikeMagicProjectile()
 {
 	SphereComp->OnComponentBeginOverlap.AddDynamic(this, &ARoguelikeMagicProjectile::OnActorOverlap);
+	
+	MovementComp->InitialSpeed = 2500.0f;
 
 	FlightSoundComp = CreateDefaultSubobject<UAudioComponent>("FlightSoundComp");
 	FlightSoundComp->SetupAttachment(SphereComp);
