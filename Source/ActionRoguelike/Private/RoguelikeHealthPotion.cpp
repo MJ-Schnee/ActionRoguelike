@@ -3,28 +3,49 @@
 
 #include "RoguelikeHealthPotion.h"
 
+#include "RoguelikePlayerState.h"
 #include "RoguelikeAttributeComponent.h"
 
 ARoguelikeHealthPotion::ARoguelikeHealthPotion()
 {
 	HealAmount = 100.0f;
+	Cost = 100.f;
 }
 
 void ARoguelikeHealthPotion::Interact_Implementation(APawn* InstigatorPawn)
-{	
-	if (InstigatorPawn)
+{
+	if (!InstigatorPawn)
 	{
-		URoguelikeAttributeComponent* AttributeComponent = Cast<URoguelikeAttributeComponent>(
-			InstigatorPawn->GetComponentByClass(URoguelikeAttributeComponent::StaticClass()));
+		return;
+	}
 	
-		if (AttributeComponent)
-		{
-			const bool bHealedInstigator = AttributeComponent->ApplyHealthChange(this, HealAmount);
+	URoguelikeAttributeComponent* AttributeComponent = Cast<URoguelikeAttributeComponent>(
+		InstigatorPawn->GetComponentByClass(URoguelikeAttributeComponent::StaticClass()));
+	if (!AttributeComponent)
+	{
+		return;
+	}
+
+	ARoguelikePlayerState* PlayerState = Cast<ARoguelikePlayerState>(InstigatorPawn->GetPlayerState());
+	if (!PlayerState)
+	{
+		return;
+	}
+
+	bool bPurchaseSuccessful = PlayerState->AddCredits(-Cost); 
+	if (!bPurchaseSuccessful)
+	{
+		return;
+	}
 	
-			if (bHealedInstigator)
-			{
-				ActivateItemCooldown();
-			}
-		}
+	const bool bHealedInstigator = AttributeComponent->ApplyHealthChange(this, HealAmount);
+	if (bHealedInstigator)
+	{
+		ActivateItemCooldown();
+	}
+	else
+	{
+		// Return the player's money if they weren't healed
+		PlayerState->AddCredits(Cost);
 	}
 }

@@ -19,6 +19,9 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Health")
 	float HealAmount;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Credits")
+	float Cost;
 
 public:
 	

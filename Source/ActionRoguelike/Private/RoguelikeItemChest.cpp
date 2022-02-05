@@ -18,11 +18,6 @@ ARoguelikeItemChest::ARoguelikeItemChest()
 	TargetPitch = 110;
 }
 
-void ARoguelikeItemChest::Interact_Implementation(APawn* InstigatorPawn)
-{
-	LidMesh->SetRelativeRotation(FRotator(TargetPitch, 0, 0));
-}
-
 // Called when the game starts or when spawned
 void ARoguelikeItemChest::BeginPlay()
 {

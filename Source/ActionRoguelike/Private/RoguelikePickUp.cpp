@@ -19,10 +19,17 @@ void ARoguelikePickUp::SetItemVisible(bool Visible)
 
 void ARoguelikePickUp::ActivateItemCooldown()
 {
-	SetItemVisible(false);
+	if (RespawnTime > 0.f)
+	{
+		SetItemVisible(false);
 	
-	GetWorldTimerManager().SetTimer(RespawnTimerHandle, this,
-		&ARoguelikePickUp::RespawnItem, RespawnTime);
+		GetWorldTimerManager().SetTimer(RespawnTimerHandle, this,
+			&ARoguelikePickUp::RespawnItem, RespawnTime);	
+	}
+	else
+	{
+		Destroy();
+	}
 }
 
 void ARoguelikePickUp::RespawnItem()

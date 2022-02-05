@@ -16,35 +16,49 @@ class ACTIONROGUELIKE_API ARoguelikeGameModeBase : public AGameModeBase
 	GENERATED_BODY()
 
 public:
-
 	ARoguelikeGameModeBase();
-	
+
 	virtual void StartPlay() override;
 
 	virtual void OnActorKilled(AActor* VictimActor, AActor* KillerActor);
 
 protected:
-
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	TSubclassOf<AActor> MinionClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	UEnvQuery* SpawnBotQuery;
-	
+
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	UCurveFloat* DifficultyCurve;
 
 	FTimerHandle SpawnBotsTimerHandle;
 
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
-	float SpawnTimerInterval;
-	
+	float BotSpawnTimerInterval;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Credits")
+	float CreditAmountKillMinion;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Pickups")
+	UEnvQuery* ItemPickupQuery;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Pickups")
+	TSubclassOf<AActor> CoinPickupClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Pickups")
+	TSubclassOf<AActor> HealthPotionClass;
+
 	UFUNCTION()
 	void SpawnBotTimerElapsed();
 
 	UFUNCTION()
-	void OnQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstance, EEnvQueryStatus::Type QueryStatus);
+	void OnSpawnBotQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstance, EEnvQueryStatus::Type QueryStatus);
 
 	UFUNCTION()
 	void RespawnPlayerElapsed(AController* Controller);
+
+	UFUNCTION()
+	void OnItemPickupQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstance,
+	                                EEnvQueryStatus::Type QueryStatus);
 };
