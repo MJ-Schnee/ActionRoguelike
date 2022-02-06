@@ -12,6 +12,7 @@ class URoguelikeInteractionComponent;
 class UAnimMontage;
 class ARoguelikeProjectile;
 class URoguelikeAttributeComponent;
+class URoguelikeActionComponent;
 
 UCLASS()
 class ACTIONROGUELIKE_API ARoguelikeCharacter : public ACharacter
@@ -19,7 +20,6 @@ class ACTIONROGUELIKE_API ARoguelikeCharacter : public ACharacter
 	GENERATED_BODY()
 
 protected:
-	
 	// Primary attack
 	UPROPERTY(EditAnywhere, Category="Attack")
 	TSubclassOf<ARoguelikeProjectile> PrimaryAttackBP;
@@ -32,43 +32,44 @@ protected:
 	// Black hole ability
 	UPROPERTY(EditAnywhere, Category="Attack")
 	TSubclassOf<ARoguelikeProjectile> BlackHoleAbilityBP;
-	
+
 	UPROPERTY(EditAnywhere, Category="Attack")
 	UAnimMontage* BlackHoleAbilityAnim;
-	
+
 	FTimerDelegate TimerDelegate_BlackHoleAbility;
 
 	// Teleport ability
 	UPROPERTY(EditAnywhere, Category="Attack")
 	TSubclassOf<ARoguelikeProjectile> TeleportAbilityBP;
-	
+
 	UPROPERTY(EditAnywhere, Category="Attack")
 	UAnimMontage* TeleportAbilityAnim;
-	
+
 	FTimerDelegate TimerDelegate_TeleportAbility;
 
 public:
-	
 	// Sets default values for this character's properties
 	ARoguelikeCharacter();
 
 protected:
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components");
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USpringArmComponent* SpringArmComp;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components");
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UCameraComponent* CameraComp;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components");
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	URoguelikeInteractionComponent* InteractionComp;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components");
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	URoguelikeAttributeComponent* AttributeComp;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Effects");
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Effects")
 	UParticleSystem* MuzzleFlash;
-	
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	URoguelikeActionComponent* ActionComp;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -76,9 +77,13 @@ protected:
 	virtual void PostInitializeComponents() override;
 
 	void MoveForward(float Value);
-	
+
 	void MoveRight(float Value);
-	
+
+	void SprintStart();
+
+	void SprintStop();
+
 	void PrimaryInteract();
 
 	// Function bound to timers to spawn player abilities
@@ -86,17 +91,16 @@ protected:
 	void UseAbility_TimeElapsed(FName SpawnSocket, UClass* AbilityClass);
 
 	void PrimaryAttack();
-	
+
 	void BlackHoleAbility();
 
 	void TeleportAbility();
 
 	UFUNCTION()
-	void OnHealthChanged(AActor* InstigatorActor, URoguelikeAttributeComponent* OwningComp, float NewHealth, float Delta);
+	void OnHealthChanged(AActor* InstigatorActor, URoguelikeAttributeComponent* OwningComp, float NewHealth,
+	                     float Delta);
 
 public:
-	
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
 };

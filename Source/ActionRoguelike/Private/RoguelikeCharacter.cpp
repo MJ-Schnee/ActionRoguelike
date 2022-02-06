@@ -4,6 +4,7 @@
 #include "RoguelikeCharacter.h"
 
 #include "DrawDebugHelpers.h"
+#include "RoguelikeActionComponent.h"
 #include "RoguelikeAttributeComponent.h"
 #include "RoguelikeInteractionComponent.h"
 #include "Camera/CameraComponent.h"
@@ -20,20 +21,20 @@ ARoguelikeCharacter::ARoguelikeCharacter()
  	// Disable calling Tick() to improve performance
 	PrimaryActorTick.bCanEverTick = false;
 
-	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComp"));
+	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>("SpringArmComp");
 	SpringArmComp->bUsePawnControlRotation = true;
 	SpringArmComp->SetupAttachment(RootComponent);
 
-	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
+	CameraComp = CreateDefaultSubobject<UCameraComponent>("CameraComp");
 	CameraComp->SetupAttachment(SpringArmComp);
-
-	InteractionComp = CreateDefaultSubobject<URoguelikeInteractionComponent>(TEXT("InteractionComp"));
-
-	AttributeComp = CreateDefaultSubobject<URoguelikeAttributeComponent>(TEXT("AttributeComp"));
-
 	GetCharacterMovement()->bOrientRotationToMovement = true;
-
 	bUseControllerRotationYaw = false;
+
+	InteractionComp = CreateDefaultSubobject<URoguelikeInteractionComponent>("InteractionComp");
+
+	AttributeComp = CreateDefaultSubobject<URoguelikeAttributeComponent>("AttributeComp");
+
+	ActionComp = CreateDefaultSubobject<URoguelikeActionComponent>("ActionComp");
 }
 
 void ARoguelikeCharacter::PostInitializeComponents()
@@ -70,6 +71,8 @@ void ARoguelikeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	PlayerInputComponent->BindAxis("MoveForward", this, &ARoguelikeCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ARoguelikeCharacter::MoveRight);
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &ARoguelikeCharacter::SprintStart);
+	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &ARoguelikeCharacter::SprintStop);
 
 	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
@@ -99,6 +102,16 @@ void ARoguelikeCharacter::MoveRight(float Value)
 	FVector RightVector = FRotationMatrix(ControlRot).GetScaledAxis(EAxis::Y);
 	
 	AddMovementInput(RightVector, Value);
+}
+
+void ARoguelikeCharacter::SprintStart()
+{
+	ActionComp->StartActionByName(this, "Sprint");
+}
+
+void ARoguelikeCharacter::SprintStop()
+{
+	ActionComp->StopActionByName(this, "Sprint");
 }
 
 void ARoguelikeCharacter::PrimaryInteract()
