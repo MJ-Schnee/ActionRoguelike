@@ -24,7 +24,11 @@ bool URoguelikeGameplayFunctionLibrary::ApplyDirectionalDamage(AActor* DamageIns
 		UPrimitiveComponent* HitResultComp = HitResult.GetComponent();
 		if (HitResultComp && HitResultComp->IsSimulatingPhysics(HitResult.BoneName))
 		{
-			HitResultComp->AddImpulseAtLocation(-HitResult.ImpactNormal * 300000.f, HitResult.ImpactPoint, HitResult.BoneName);
+			// Direction hit from = Normalize vector of Target location - Origin location
+			FVector Direction = HitResult.TraceEnd - HitResult.TraceStart;
+			Direction.Normalize();
+			
+			HitResultComp->AddImpulseAtLocation(Direction * 300000.f, HitResult.ImpactPoint, HitResult.BoneName);
 		}
 		
 		return true;
