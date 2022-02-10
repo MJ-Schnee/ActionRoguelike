@@ -12,6 +12,11 @@ URoguelikeActionComponent::URoguelikeActionComponent()
 void URoguelikeActionComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	for (TSubclassOf<URoguelikeAction> ActionClass : DefaultActions)
+	{
+		AddAction(ActionClass);
+	}
 }
 
 void URoguelikeActionComponent::TickComponent(float DeltaTime, ELevelTick TickType,

@@ -17,6 +17,9 @@ public:
 	URoguelikeActionComponent();
 
 protected:
+	UPROPERTY(EditAnywhere, Category = "Actions")
+	TArray<TSubclassOf<URoguelikeAction>> DefaultActions;
+	
 	UPROPERTY()
 	TArray<URoguelikeAction*> Actions;
 

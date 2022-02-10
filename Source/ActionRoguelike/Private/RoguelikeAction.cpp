@@ -12,3 +12,14 @@ void URoguelikeAction::StopAction_Implementation(AActor* Instigator)
 {
 	UE_LOG(LogTemp, Log, TEXT("Action \"%s\" has been stopped"), *GetNameSafe(this));
 }
+
+UWorld* URoguelikeAction::GetWorld() const
+{
+	UActorComponent* Comp = Cast<UActorComponent>(GetOuter());
+	if (Comp)
+	{
+		return Comp->GetWorld();
+	}
+
+	return nullptr;
+}

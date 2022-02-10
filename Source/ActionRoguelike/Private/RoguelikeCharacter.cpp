@@ -3,7 +3,6 @@
 
 #include "RoguelikeCharacter.h"
 
-#include "DrawDebugHelpers.h"
 #include "RoguelikeActionComponent.h"
 #include "RoguelikeAttributeComponent.h"
 #include "RoguelikeInteractionComponent.h"
@@ -12,9 +11,6 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "RoguelikeProjectile.h"
 #include "Kismet/GameplayStatics.h"
-
-static TAutoConsoleVariable<bool> CVarDrawDebugAttack(TEXT("rl.DrawDebugAttack"), false,
-	TEXT("Enables drawing debug lines for interaction component."), ECVF_Cheat);
 
 ARoguelikeCharacter::ARoguelikeCharacter()
 {
@@ -42,20 +38,11 @@ void ARoguelikeCharacter::PostInitializeComponents()
 	Super::PostInitializeComponents();
 
 	AttributeComp->OnHealthChanged.AddDynamic(this, &ARoguelikeCharacter::OnHealthChanged);
+}
 
-	// Primary attack timer and spawn setup
-	FName RightHandSocket = "Muzzle_01";
-	UClass* PrimaryAttack = PrimaryAttackBP;
-	TimerDelegate_PrimaryAttack.BindUFunction(this, FName("UseAbility_TimeElapsed"), RightHandSocket, PrimaryAttack);
-
-	// Black Hole ability timer and spawn setup
-	UClass* BlackHoleAbility = BlackHoleAbilityBP;
-	TimerDelegate_BlackHoleAbility.BindUFunction(this, FName("UseAbility_TimeElapsed"), RightHandSocket, BlackHoleAbility);
-	
-	// Teleport ability timer and spawn setup
-	FName LeftHandSocket = "Muzzle_02";
-	UClass* TeleportAbility = TeleportAbilityBP;
-	TimerDelegate_TeleportAbility.BindUFunction(this, FName("UseAbility_TimeElapsed"), LeftHandSocket, TeleportAbility);
+FVector ARoguelikeCharacter::GetPawnViewLocation() const
+{
+	return CameraComp->GetComponentLocation();
 }
 
 void ARoguelikeCharacter::BeginPlay()
@@ -122,93 +109,19 @@ void ARoguelikeCharacter::PrimaryInteract()
 	}
 }
 
-void ARoguelikeCharacter::UseAbility_TimeElapsed(FName SpawnSocket, UClass* AbilityClass)
-{
-	FVector TraceStart = CameraComp->GetComponentLocation();
-	FVector TraceEnd = TraceStart + GetControlRotation().Vector() * 5000.0f;
-
-	FCollisionShape Shape;
-	float ShapeRadius = 20.0f;
-	Shape.SetSphere(ShapeRadius);
-	
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(this);
-
-	FCollisionObjectQueryParams ObjParams;
-	ObjParams.AddObjectTypesToQuery(ECC_WorldDynamic);
-	ObjParams.AddObjectTypesToQuery(ECC_WorldStatic);
-	ObjParams.AddObjectTypesToQuery(ECC_Pawn);
-	
-	bool bDrawDebugAttack = CVarDrawDebugAttack.GetValueOnGameThread();
-	FColor DebugColor = FColor::Green;
-	TArray<FHitResult> Hits;
-	if (GetWorld()->SweepMultiByObjectType(Hits, TraceStart, TraceEnd, FQuat::Identity, ObjParams, Shape, Params))
-	{
-		for (FHitResult Hit : Hits)
-		{
-			if (bDrawDebugAttack)
-			{
-				DrawDebugLine(GetWorld(), TraceStart, Hit.ImpactPoint, DebugColor, false, 2.0f, 0, 2.0f);
-				DrawDebugSphere(GetWorld(), Hit.Location, ShapeRadius, 16, DebugColor, false, 2.0f);	
-			}
-			
-			// Dismiss player spawned projectiles
-			ARoguelikeProjectile* Projectile = Cast<ARoguelikeProjectile>(Hit.Actor);
-			bool bPlayerProjectile = Projectile != nullptr &&
-									 Cast<ARoguelikeCharacter>(Projectile->GetInstigator()) != nullptr;
-			if (!bPlayerProjectile)
-			{
-				// Override TraceEnd for determining impact point
-				TraceEnd = Hit.ImpactPoint;
-				break;
-			}
-		}
-	}
-
-	FVector HandLocation = GetMesh()->GetSocketLocation(SpawnSocket);
-
-	FRotator RotationToCrosshair = (TraceEnd - HandLocation).Rotation();
-	
-	FTransform SpawnTransform = FTransform(RotationToCrosshair, HandLocation);
-
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	SpawnParams.Instigator = this;
-	
-	GetWorld()->SpawnActor<AActor>(AbilityClass, SpawnTransform, SpawnParams);
-}
-
 void ARoguelikeCharacter::PrimaryAttack()
 {
-	USceneComponent* CharacterMesh = GetMesh();
-	UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, CharacterMesh, "Muzzle_01");
-	
-	PlayAnimMontage(PrimaryAttackAnim);
-
-	FTimerHandle TimerHandle_PrimaryAttack;
-	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, TimerDelegate_PrimaryAttack, 0.2f, false);
+	ActionComp->StartActionByName(this, "PrimaryAttack");
 }
 
 void ARoguelikeCharacter::BlackHoleAbility()
 {
-	USceneComponent* CharacterMesh = GetMesh();
-	UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, CharacterMesh, "Muzzle_01");
-	
-	PlayAnimMontage(BlackHoleAbilityAnim);
-
-	FTimerHandle TimerHandle_BlackHoleAbility;
-	GetWorldTimerManager().SetTimer(TimerHandle_BlackHoleAbility, TimerDelegate_BlackHoleAbility, 0.2f, false);
+	ActionComp->StartActionByName(this, "BlackHoleAbility");
 }
 
 void ARoguelikeCharacter::TeleportAbility()
 {
-	USceneComponent* CharacterMesh = GetMesh();
-	UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, CharacterMesh, "Muzzle_02");
-	
-	PlayAnimMontage(TeleportAbilityAnim);
-
-	FTimerHandle TimerHandle_TeleportAbility;
-	GetWorldTimerManager().SetTimer(TimerHandle_TeleportAbility, TimerDelegate_TeleportAbility, 0.2f, false);
+	ActionComp->StartActionByName(this, "TeleportAbility");
 }
 
 void ARoguelikeCharacter::OnHealthChanged(AActor* InstigatorActor, URoguelikeAttributeComponent* OwningComp, float NewHealth, float Delta)

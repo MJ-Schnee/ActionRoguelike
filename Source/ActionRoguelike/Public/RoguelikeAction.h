@@ -20,4 +20,6 @@ public:
 	// Action nickname to start/stop without referencing object
 	UPROPERTY(EditDefaultsOnly, Category = "Action")
 	FName ActionName;
+
+	virtual UWorld* GetWorld() const override;
 };
