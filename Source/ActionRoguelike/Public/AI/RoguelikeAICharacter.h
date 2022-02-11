@@ -9,6 +9,7 @@
 class URoguelikeAttributeComponent;
 class UPawnSensingComponent;
 class URoguelikeWorldUserWidget;
+class URoguelikeActionComponent;
 
 UCLASS()
 class ACTIONROGUELIKE_API ARoguelikeAICharacter : public ACharacter
@@ -16,21 +17,22 @@ class ACTIONROGUELIKE_API ARoguelikeAICharacter : public ACharacter
 	GENERATED_BODY()
 
 public:
-	
 	ARoguelikeAICharacter();
 
 protected:
-
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	UPawnSensingComponent* PawnSensingComp;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components");
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	URoguelikeAttributeComponent* AttributeComp;
 
-	URoguelikeWorldUserWidget* ActiveHealthBar;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI");
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	URoguelikeActionComponent* ActionComp;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
 	TSubclassOf<UUserWidget> HealthBarWidgetClass;
+
+	URoguelikeWorldUserWidget* ActiveHealthBar;
 
 	virtual void PostInitializeComponents() override;
 
@@ -40,5 +42,6 @@ protected:
 	void OnPawnSeen(APawn* Pawn);
 
 	UFUNCTION()
-	void OnHealthChanged(AActor* InstigatorActor, URoguelikeAttributeComponent* OwningComp, float NewHealth, float Delta);
+	void OnHealthChanged(AActor* InstigatorActor, URoguelikeAttributeComponent* OwningComp, float NewHealth,
+	                     float Delta);
 };

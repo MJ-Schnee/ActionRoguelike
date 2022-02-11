@@ -6,6 +6,7 @@
 #include "AIController.h"
 #include "BrainComponent.h"
 #include "DrawDebugHelpers.h"
+#include "RoguelikeActionComponent.h"
 #include "RoguelikeAttributeComponent.h"
 #include "RoguelikeWorldUserWidget.h"
 #include "BehaviorTree/BlackboardComponent.h"
@@ -20,6 +21,8 @@ ARoguelikeAICharacter::ARoguelikeAICharacter()
  	PawnSensingComp = CreateDefaultSubobject<UPawnSensingComponent>("PawnSensingComp");
 	
 	AttributeComp = CreateDefaultSubobject<URoguelikeAttributeComponent>(TEXT("AttributeComp"));
+
+	ActionComp = CreateDefaultSubobject<URoguelikeActionComponent>(TEXT("ActionComp"));
 
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 

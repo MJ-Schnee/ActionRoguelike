@@ -3,6 +3,7 @@
 
 #include "RoguelikeMagicProjectile.h"
 
+#include "RoguelikeActionComponent.h"
 #include "RoguelikeGameplayFunctionLibrary.h"
 #include "Components/AudioComponent.h"
 #include "Components/SphereComponent.h"
@@ -12,7 +13,7 @@
 ARoguelikeMagicProjectile::ARoguelikeMagicProjectile()
 {
 	SphereComp->OnComponentBeginOverlap.AddDynamic(this, &ARoguelikeMagicProjectile::OnActorOverlap);
-	
+
 	MovementComp->InitialSpeed = 2500.0f;
 
 	FlightSoundComp = CreateDefaultSubobject<UAudioComponent>("FlightSoundComp");
@@ -33,17 +34,29 @@ void ARoguelikeMagicProjectile::Explode_Implementation()
 		FlightSoundComp->Stop();
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSound, GetActorLocation(), GetActorRotation());
 
-		UGameplayStatics::PlayWorldCameraShake(GetWorld(), CameraShake, GetActorLocation(), CameraShakeInnerRadius, CameraShakeOuterRadius);
+		UGameplayStatics::PlayWorldCameraShake(GetWorld(), CameraShake, GetActorLocation(), CameraShakeInnerRadius,
+		                                       CameraShakeOuterRadius);
 
 		Destroy();
 	}
 }
 
 void ARoguelikeMagicProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+                                               UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+                                               const FHitResult& SweepResult)
 {
 	if (OtherActor && OtherActor != GetInstigator())
 	{
+		URoguelikeActionComponent* ActionComp = Cast<URoguelikeActionComponent>(
+			OtherActor->GetComponentByClass(URoguelikeActionComponent::StaticClass()));
+		if (ActionComp && ActionComp->ActiveGameplayTags.HasTag(ParryTag))
+		{
+			MovementComp->Velocity = -MovementComp->Velocity;
+
+			SetInstigator(Cast<APawn>(OtherActor));
+			return;
+		}
+
 		if (URoguelikeGameplayFunctionLibrary::ApplyDirectionalDamage(GetInstigator(), OtherActor, Damage, SweepResult))
 		{
 			Explode();
