@@ -4,6 +4,9 @@
 #include "RoguelikeActionComponent.h"
 #include "RoguelikeAction.h"
 
+static TAutoConsoleVariable<bool> CVarDebugActionComponent(
+	TEXT("rl.DebugActionComponent"), false, TEXT("Show debug messages from the Action Component."), ECVF_Cheat);
+
 URoguelikeActionComponent::URoguelikeActionComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -15,7 +18,7 @@ void URoguelikeActionComponent::BeginPlay()
 
 	for (TSubclassOf<URoguelikeAction> ActionClass : DefaultActions)
 	{
-		AddAction(ActionClass);
+		AddAction(GetOwner(), ActionClass);
 	}
 }
 
@@ -24,22 +27,40 @@ void URoguelikeActionComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	FString DebugMsg = GetNameSafe(GetOwner()) + " : " + ActiveGameplayTags.ToStringSimple();
-	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::White, DebugMsg);
+	if (CVarDebugActionComponent.GetValueOnGameThread())
+	{
+		FString DebugMsg = GetNameSafe(GetOwner()) + " : " + ActiveGameplayTags.ToStringSimple();
+		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::White, DebugMsg);
+	}
 }
 
-void URoguelikeActionComponent::AddAction(TSubclassOf<URoguelikeAction> ActionClass)
+void URoguelikeActionComponent::AddAction(AActor* Instigator, TSubclassOf<URoguelikeAction> ActionClass)
 {
 	if (!ensure(ActionClass))
 	{
 		return;
 	}
 
- 	URoguelikeAction* NewAction = NewObject<URoguelikeAction>(this, ActionClass);
+	URoguelikeAction* NewAction = NewObject<URoguelikeAction>(this, ActionClass);
 	if (ensure(NewAction))
 	{
 		Actions.Add(NewAction);
+
+		if (NewAction->bAutoStart && ensure(NewAction->CanStart(Instigator)))
+		{
+			NewAction->StartAction(Instigator);
+		}
 	}
+}
+
+void URoguelikeActionComponent::RemoveAction(URoguelikeAction* ActionToRemove)
+{
+	if (!ensure(ActionToRemove && !ActionToRemove->IsRunning()))
+	{
+		return;
+	}
+
+	Actions.Remove(ActionToRemove);
 }
 
 bool URoguelikeActionComponent::StartActionByName(AActor* Instigator, FName ActionName)
@@ -50,11 +71,14 @@ bool URoguelikeActionComponent::StartActionByName(AActor* Instigator, FName Acti
 		{
 			if (!Action->CanStart(Instigator))
 			{
-				FString FailedMsg = FString::Printf(TEXT("Failed to run: %s"), *ActionName.ToString());
-				GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FailedMsg);
+				if (CVarDebugActionComponent.GetValueOnGameThread())
+				{
+					FString FailedMsg = FString::Printf(TEXT("Failed to run: %s"), *ActionName.ToString());
+					GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FailedMsg);
+				}
 				continue;
 			}
-			
+
 			Action->StartAction(Instigator);
 			return true;
 		}

@@ -19,12 +19,15 @@ public:
 	FGameplayTagContainer ActiveGameplayTags;
 
 	UFUNCTION(BlueprintCallable, Category = "Actions")
-	void AddAction(TSubclassOf<URoguelikeAction> ActionClass);
+	void AddAction(AActor* Instigator, TSubclassOf<URoguelikeAction> ActionClass);
 
-	UFUNCTION(BlueprintCallable, Category = "Action")
+	UFUNCTION(BlueprintCallable, Category = "Actions")
+	void RemoveAction(URoguelikeAction* ActionToRemove);
+
+	UFUNCTION(BlueprintCallable, Category = "Actions")
 	bool StartActionByName(AActor* Instigator, FName ActionName);
 
-	UFUNCTION(BlueprintCallable, Category = "Action")
+	UFUNCTION(BlueprintCallable, Category = "Actions")
 	bool StopActionByName(AActor* Instigator, FName ActionName);
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,

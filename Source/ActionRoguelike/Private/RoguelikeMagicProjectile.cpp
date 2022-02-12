@@ -60,6 +60,11 @@ void ARoguelikeMagicProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedCo
 		if (URoguelikeGameplayFunctionLibrary::ApplyDirectionalDamage(GetInstigator(), OtherActor, Damage, SweepResult))
 		{
 			Explode();
+
+			if (ActionComp)
+			{
+				ActionComp->AddAction(GetInstigator(), DamageEffectClass);
+			}
 		}
 	}
 }

@@ -4,9 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
+#include "RoguelikeActionEffect.h"
 #include "RoguelikeProjectile.h"
 #include "RoguelikeMagicProjectile.generated.h"
-
 
 UCLASS()
 class ACTIONROGUELIKE_API ARoguelikeMagicProjectile : public ARoguelikeProjectile
@@ -35,8 +35,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "CameraShake")
 	float CameraShakeOuterRadius;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Action")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Actions")
 	FGameplayTag ParryTag;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Actions")
+	TSubclassOf<URoguelikeActionEffect> DamageEffectClass;
 
 	virtual void Explode_Implementation() override;
 

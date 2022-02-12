@@ -13,7 +13,7 @@ class ACTIONROGUELIKE_API URoguelikeAction : public UObject
 	GENERATED_BODY()
 
 protected:
-	UFUNCTION(BlueprintCallable, Category = "Action")
+	UFUNCTION(BlueprintCallable, Category = "Actions")
 	URoguelikeActionComponent* GetOwningComponent() const;
 
 	// Tags added to owning actor when activated and removed when action stops
@@ -27,20 +27,23 @@ protected:
 	bool bIsRunning;
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "Action")
+	UPROPERTY(EditDefaultsOnly, Category = "Actions")
+	bool bAutoStart;
+	
+	UFUNCTION(BlueprintCallable, Category = "Actions")
 	bool IsRunning() const;
 
-	UFUNCTION(BlueprintNativeEvent, Category = "Action")
+	UFUNCTION(BlueprintNativeEvent, Category = "Actions")
 	bool CanStart(AActor* Instigator);
 
-	UFUNCTION(BlueprintNativeEvent, Category = "Action")
+	UFUNCTION(BlueprintNativeEvent, Category = "Actions")
 	void StartAction(AActor* Instigator);
 
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Action")
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Actions")
 	void StopAction(AActor* Instigator);
 
 	// Action nickname to start/stop without referencing object
-	UPROPERTY(EditDefaultsOnly, Category = "Action")
+	UPROPERTY(EditDefaultsOnly, Category = "Actions")
 	FName ActionName;
 
 	virtual UWorld* GetWorld() const override;
