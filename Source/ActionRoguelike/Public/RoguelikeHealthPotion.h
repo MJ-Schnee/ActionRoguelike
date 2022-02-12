@@ -21,7 +21,7 @@ protected:
 	float HealAmount;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Credits")
-	float Cost;
+	int32 Cost;
 
 public:
 	

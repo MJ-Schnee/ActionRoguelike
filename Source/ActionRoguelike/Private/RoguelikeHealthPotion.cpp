@@ -9,7 +9,7 @@
 ARoguelikeHealthPotion::ARoguelikeHealthPotion()
 {
 	HealAmount = 100.0f;
-	Cost = 100.f;
+	Cost = 100;
 }
 
 void ARoguelikeHealthPotion::Interact_Implementation(APawn* InstigatorPawn)
@@ -26,14 +26,14 @@ void ARoguelikeHealthPotion::Interact_Implementation(APawn* InstigatorPawn)
 		return;
 	}
 
-	ARoguelikePlayerState* PlayerState = Cast<ARoguelikePlayerState>(InstigatorPawn->GetPlayerState());
+	ARoguelikePlayerState* PlayerState = InstigatorPawn->GetPlayerState<ARoguelikePlayerState>();
 	if (!PlayerState)
 	{
 		return;
 	}
 
-	bool bPurchaseSuccessful = PlayerState->AddCredits(-Cost); 
-	if (!bPurchaseSuccessful)
+	bool bHasEnoughCredits = PlayerState->GetCredits() <= Cost; 
+	if (!bHasEnoughCredits)
 	{
 		return;
 	}
@@ -42,10 +42,6 @@ void ARoguelikeHealthPotion::Interact_Implementation(APawn* InstigatorPawn)
 	if (bHealedInstigator)
 	{
 		ActivateItemCooldown();
-	}
-	else
-	{
-		// Return the player's money if they weren't healed
-		PlayerState->AddCredits(Cost);
+		PlayerState->RemoveCredits(Cost);
 	}
 }

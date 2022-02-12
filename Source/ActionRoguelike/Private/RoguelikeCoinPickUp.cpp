@@ -8,7 +8,7 @@
 
 ARoguelikeCoinPickUp::ARoguelikeCoinPickUp()
 {
-	CreditWorth = 15.f;
+	CreditWorth = 15;
 
 	MeshComp->OnComponentBeginOverlap.AddDynamic(this, &ARoguelikeCoinPickUp::OnActorOverlap);
 }
@@ -20,16 +20,14 @@ void ARoguelikeCoinPickUp::Interact_Implementation(APawn* InstigatorPawn)
 		return;
 	}
 
-	ARoguelikePlayerState* PlayerState = Cast<ARoguelikePlayerState>(InstigatorPawn->GetPlayerState());
+	ARoguelikePlayerState* PlayerState = InstigatorPawn->GetPlayerState<ARoguelikePlayerState>();
 	if (!PlayerState)
 	{
 		return;
 	}
 
-	if (PlayerState->AddCredits(CreditWorth))
-	{
-		ActivateItemCooldown();
-	}
+	PlayerState->AddCredits(CreditWorth);
+	ActivateItemCooldown();
 }
 
 void ARoguelikeCoinPickUp::OnActorOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,

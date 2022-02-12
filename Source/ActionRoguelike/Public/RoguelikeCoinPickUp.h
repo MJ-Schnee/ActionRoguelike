@@ -18,7 +18,7 @@ public:
 protected:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Credits")
-	float CreditWorth;
+	int32 CreditWorth;
 
 public:
 	

@@ -3,26 +3,38 @@
 
 #include "RoguelikePlayerState.h"
 
-ARoguelikePlayerState::ARoguelikePlayerState()
+void ARoguelikePlayerState::AddCredits(int32 Delta)
 {
-	Credits = 0.f;
+	if (!ensure(Delta > 0))
+	{
+		return;
+	}
+	
+	Credits += Delta;
+
+	OnCreditsChanged.Broadcast(this, Credits, Delta);
 }
 
-bool ARoguelikePlayerState::AddCredits(float AdditionalCredits)
+bool ARoguelikePlayerState::RemoveCredits(int32 Delta)
 {
-	float newCreditAmount = Credits + AdditionalCredits;
-	
-	if (newCreditAmount < 0.f)
+	if (!ensure(Delta > 0))
 	{
 		return false;
 	}
 
-	Credits = newCreditAmount;
+	if (Credits < Delta)
+	{
+		return false;
+	}
 	
+	Credits -= Delta;
+
+	OnCreditsChanged.Broadcast(this, Credits, -Delta);
+
 	return true;
 }
 
-float ARoguelikePlayerState::GetCredits()
+int32 ARoguelikePlayerState::GetCredits() const
 {
 	return Credits;
 }

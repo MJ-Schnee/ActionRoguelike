@@ -46,7 +46,6 @@ void ARoguelikeGameModeBase::OnActorKilled(AActor* VictimActor, AActor* KillerAc
 	if (Player)
 	{
 		FTimerHandle RespawnDelayTimerHandle;
-
 		FTimerDelegate Delegate;
 		Delegate.BindUFunction(this, "RespawnPlayerElapsed", Player->GetController());
 
@@ -60,7 +59,7 @@ void ARoguelikeGameModeBase::OnActorKilled(AActor* VictimActor, AActor* KillerAc
 		Player = Cast<ARoguelikeCharacter>(KillerActor);
 		if (Player)
 		{
-			ARoguelikePlayerState* PlayerState = Cast<ARoguelikePlayerState>(Player->GetPlayerState());
+			ARoguelikePlayerState* PlayerState = Player->GetPlayerState<ARoguelikePlayerState>();
 			if (ensure(PlayerState))
 			{
 				PlayerState->AddCredits(CreditAmountKillMinion);
