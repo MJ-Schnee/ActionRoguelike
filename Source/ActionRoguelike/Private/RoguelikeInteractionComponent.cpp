@@ -5,14 +5,19 @@
 
 #include "DrawDebugHelpers.h"
 #include "RoguelikeGameplayInterface.h"
+#include "RoguelikeWorldUserWidget.h"
 
 
-static TAutoConsoleVariable<bool> CVarDrawDebugInteraction(TEXT("rl.DrawDebugInteraction"), false,
-	TEXT("Enables drawing debug lines for interaction component."), ECVF_Cheat);
+static TAutoConsoleVariable<bool> CVarDrawDebugInteraction(
+	TEXT("rl.DrawDebugInteraction"), false, TEXT("Enables drawing debug lines for interaction component."), ECVF_Cheat);
 
 URoguelikeInteractionComponent::URoguelikeInteractionComponent()
 {
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
+	
+	TraceDistance = 600.0f;
+	TraceRadius = 30.0f;
+	CollisionChannel = ECC_WorldDynamic;
 }
 
 void URoguelikeInteractionComponent::BeginPlay()
@@ -20,50 +25,100 @@ void URoguelikeInteractionComponent::BeginPlay()
 	Super::BeginPlay();
 }
 
-void URoguelikeInteractionComponent::PrimaryInteract()
+void URoguelikeInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType,
+												   FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	FindBestInteractable();
+}
+
+void URoguelikeInteractionComponent::FindBestInteractable()
 {
 	FCollisionObjectQueryParams ObjectQueryParams;
-	ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
+	ObjectQueryParams.AddObjectTypesToQuery(CollisionChannel);
 
 	APlayerCameraManager* CameraManager = GetWorld()->GetFirstPlayerController()->PlayerCameraManager;
 
 	FVector SweepStart = CameraManager->GetCameraLocation();
-	FVector SweepEnd = SweepStart + (CameraManager->GetCameraRotation().Vector() * 600.0f);
+	FVector SweepEnd = SweepStart + (CameraManager->GetCameraRotation().Vector() * TraceDistance);
 
 	TArray<FHitResult> Hits;
 
 	FCollisionShape Shape;
-	float ShapeRadius = 30.0f;
-	Shape.SetSphere(ShapeRadius);
+	Shape.SetSphere(TraceRadius);
 
 	bool bBlockingHit = GetWorld()->SweepMultiByObjectType(Hits, SweepStart, SweepEnd, FQuat::Identity,
-		ObjectQueryParams, Shape);
+	                                                       ObjectQueryParams, Shape);
 
 	FColor DebugColor = bBlockingHit ? FColor::Green : FColor::Red;
 
 	bool bDrawDebug = CVarDrawDebugInteraction.GetValueOnGameThread();
-	
+
+	// Clear reference before attempting to find focus
+	FocusedActor = nullptr;
+
 	for (FHitResult Hit : Hits)
 	{
 		if (bDrawDebug)
 		{
-			DrawDebugSphere(GetWorld(), Hit.ImpactPoint, ShapeRadius, 16, DebugColor, false, 2.0f);	
+			DrawDebugSphere(GetWorld(), Hit.ImpactPoint, TraceRadius, 16, DebugColor, false);
 		}
-		
+
 		if (AActor* HitActor = Hit.GetActor())
 		{
 			if (HitActor->Implements<URoguelikeGameplayInterface>())
 			{
-				APawn* OwnerPawn = Cast<APawn>(GetOwner());
-			
-				IRoguelikeGameplayInterface::Execute_Interact(HitActor, OwnerPawn);
+				FocusedActor = HitActor;
+
 				break;
 			}
 		}
 	}
 
+	if (FocusedActor)
+	{
+		if (DefaultWidgetInstance == nullptr && ensure(DefaultWidgetClass))
+		{
+			DefaultWidgetInstance = CreateWidget<URoguelikeWorldUserWidget>(GetWorld(), DefaultWidgetClass);	
+		}
+
+		if (DefaultWidgetInstance)
+		{
+			DefaultWidgetInstance->AttachedActor = FocusedActor;
+
+			if (!DefaultWidgetInstance->IsInViewport())
+			{
+				DefaultWidgetInstance->AddToViewport();	
+			}
+		}
+	}
+	else
+	{
+		if (DefaultWidgetInstance)
+		{
+			DefaultWidgetInstance->RemoveFromParent();
+		}
+	}
+
 	if (bDrawDebug)
 	{
-		DrawDebugLine(GetWorld(), SweepStart, SweepEnd, DebugColor, false, 2.0f, 0, 2.0f);
+		DrawDebugLine(GetWorld(), SweepStart, SweepEnd, DebugColor, false, 0.0f, 0, 0.0f);
 	}
+}
+
+void URoguelikeInteractionComponent::PrimaryInteract()
+{
+	if (FocusedActor == nullptr)
+	{
+		if (CVarDrawDebugInteraction.GetValueOnGameThread())
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, "No Focused Actor to interact with.");
+		}
+		return;
+	}
+
+	APawn* OwnerPawn = Cast<APawn>(GetOwner());
+
+	IRoguelikeGameplayInterface::Execute_Interact(FocusedActor, OwnerPawn);
 }

@@ -18,7 +18,7 @@ void ARoguelikeHealthPotion::Interact_Implementation(APawn* InstigatorPawn)
 	{
 		return;
 	}
-	
+
 	URoguelikeAttributeComponent* AttributeComponent = Cast<URoguelikeAttributeComponent>(
 		InstigatorPawn->GetComponentByClass(URoguelikeAttributeComponent::StaticClass()));
 	if (!AttributeComponent)
@@ -32,12 +32,12 @@ void ARoguelikeHealthPotion::Interact_Implementation(APawn* InstigatorPawn)
 		return;
 	}
 
-	bool bHasEnoughCredits = PlayerState->GetCredits() <= Cost; 
+	bool bHasEnoughCredits = PlayerState->GetCredits() >= Cost;
 	if (!bHasEnoughCredits)
 	{
 		return;
 	}
-	
+
 	const bool bHealedInstigator = AttributeComponent->ApplyHealthChange(this, HealAmount);
 	if (bHealedInstigator)
 	{
