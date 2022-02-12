@@ -80,12 +80,12 @@ bool URoguelikeAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, fl
 
 	Health = FMath::Clamp(Health + Delta, 0.0f, MaxHealth);
 
-	float TrueDelta = Health - OldHealth;
+	float HealthDelta = Health - OldHealth;
 
-	OnHealthChanged.Broadcast(InstigatorActor, this, Health, TrueDelta);
+	OnHealthChanged.Broadcast(InstigatorActor, this, Health, HealthDelta);
 
 	// Died
-	if (TrueDelta <= 0.f && FMath::IsNearlyZero(Health))
+	if (HealthDelta < 0.f && FMath::IsNearlyZero(Health))
 	{
 		ARoguelikeGameModeBase* GameMode = GetWorld()->GetAuthGameMode<ARoguelikeGameModeBase>();
 		if (GameMode)
@@ -94,7 +94,7 @@ bool URoguelikeAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, fl
 		}
 	}
 
-	return !FMath::IsNearlyZero(TrueDelta);
+	return !FMath::IsNearlyZero(HealthDelta);
 }
 
 bool URoguelikeAttributeComponent::IsAlive() const
