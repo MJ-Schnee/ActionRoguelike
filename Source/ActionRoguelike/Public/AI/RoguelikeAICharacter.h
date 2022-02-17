@@ -16,9 +16,6 @@ class ACTIONROGUELIKE_API ARoguelikeAICharacter : public ACharacter
 {
 	GENERATED_BODY()
 
-public:
-	ARoguelikeAICharacter();
-
 protected:
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	UPawnSensingComponent* PawnSensingComp;
@@ -32,11 +29,25 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
 	TSubclassOf<UUserWidget> HealthBarWidgetClass;
 
+	UPROPERTY()
 	URoguelikeWorldUserWidget* ActiveHealthBar;
 
-	virtual void PostInitializeComponents() override;
+	UPROPERTY(EditDefaultsOnly, Category = "AI")
+	FName TargetActorKey;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
+	TSubclassOf<UUserWidget> SeenPlayerWidgetClass;
+
+	UPROPERTY()
+	URoguelikeWorldUserWidget* SeenPlayerWidgetInstance;
+
+	UPROPERTY(EditDefaultsOnly, Category = "AI")
+	FName IsAggroedKey;
 
 	void SetTargetActor(AActor* NewTarget);
+
+	// Activates the "!" alert widget
+	void ActivateAlertWidget();
 
 	UFUNCTION()
 	void OnPawnSeen(APawn* Pawn);
@@ -44,4 +55,9 @@ protected:
 	UFUNCTION()
 	void OnHealthChanged(AActor* InstigatorActor, URoguelikeAttributeComponent* OwningComp, float NewHealth,
 	                     float Delta);
+
+	virtual void PostInitializeComponents() override;
+
+public:
+	ARoguelikeAICharacter();
 };

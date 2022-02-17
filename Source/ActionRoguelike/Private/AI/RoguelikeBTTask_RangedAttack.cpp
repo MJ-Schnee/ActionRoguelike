@@ -25,7 +25,7 @@ EBTNodeResult::Type URoguelikeBTTask_RangedAttack::ExecuteTask(UBehaviorTreeComp
 		}
 
 		FVector MuzzleLocation = AICharacter->GetMesh()->GetSocketLocation("Muzzle_01");
-		
+
 		AActor* TargetActor = Cast<AActor>(OwnerComp.GetBlackboardComponent()->GetValueAsObject("TargetActor"));
 		if (TargetActor == nullptr)
 		{
@@ -34,6 +34,10 @@ EBTNodeResult::Type URoguelikeBTTask_RangedAttack::ExecuteTask(UBehaviorTreeComp
 
 		if (!URoguelikeAttributeComponent::IsActorAlive(TargetActor))
 		{
+			// Reset target actor and aggro if target dies
+			OwnerComp.GetBlackboardComponent()->SetValueAsObject("TargetActor", nullptr);
+			OwnerComp.GetBlackboardComponent()->SetValueAsBool("IsAggroed", false);
+
 			return EBTNodeResult::Failed;
 		}
 
@@ -48,10 +52,11 @@ EBTNodeResult::Type URoguelikeBTTask_RangedAttack::ExecuteTask(UBehaviorTreeComp
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 		SpawnParams.Instigator = AICharacter;
 
-		AActor* Projectile = GetWorld()->SpawnActor<AActor>(ProjectileClass, MuzzleLocation, MuzzleRotation, SpawnParams);
+		AActor* Projectile = GetWorld()->SpawnActor<AActor>(ProjectileClass, MuzzleLocation, MuzzleRotation,
+		                                                    SpawnParams);
 
 		return Projectile ? EBTNodeResult::Succeeded : EBTNodeResult::Failed;
 	}
-	
+
 	return EBTNodeResult::Failed;
 }

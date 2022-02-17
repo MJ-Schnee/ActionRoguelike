@@ -24,7 +24,7 @@ void URoguelikeBTService_CheckAtkRange::TickNode(UBehaviorTreeComponent& OwnerCo
 				if (ensure(AIPawn))
 				{
 					float DistanceToTarget = FVector::Distance(TargetActor->GetActorLocation(),
-						AIPawn->GetActorLocation());
+					                                           AIPawn->GetActorLocation());
 
 					bool bWithinRange = DistanceToTarget < 3000.f;
 
@@ -35,9 +35,13 @@ void URoguelikeBTService_CheckAtkRange::TickNode(UBehaviorTreeComponent& OwnerCo
 					}
 
 					BlackboardComp->SetValueAsBool(AttackRangeKey.SelectedKeyName,
-						(bWithinRange && bTargetActorVisible));
+					                               (bWithinRange && bTargetActorVisible));
+
+					return;
 				}
 			}
 		}
+
+		BlackboardComp->SetValueAsBool(AttackRangeKey.SelectedKeyName, false);
 	}
 }
