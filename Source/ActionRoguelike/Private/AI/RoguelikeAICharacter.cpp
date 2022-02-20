@@ -122,18 +122,26 @@ void ARoguelikeAICharacter::OnHealthChanged(AActor* InstigatorActor, URoguelikeA
 			return;
 		}
 
-		AAIController* AIController = GetController<AAIController>();
-		if (AIController)
+		// Aggro onto damage instigator
+		if (this != InstigatorActor)
 		{
-			// Don't set the target actor to something that it can't hurt
-			if (URoguelikeAttributeComponent::IsActorAlive(InstigatorActor))
+			AAIController* AIController = GetController<AAIController>();
+			if (AIController)
 			{
-				// Don't aggro on a target if already aggroed on another
-				if (!AIController->GetBlackboardComponent()->GetValueAsBool(IsAggroedKey))
+				// Don't set the target actor to something that it can't hurt
+				if (URoguelikeAttributeComponent::IsActorAlive(InstigatorActor))
 				{
-					ActivateAlertWidget();
-					SetTargetActor(InstigatorActor);
-					AIController->GetBlackboardComponent()->SetValueAsBool(IsAggroedKey, true);
+					// Don't aggro on a target if already aggroed on another
+					if (!AIController->GetBlackboardComponent()->GetValueAsBool(IsAggroedKey))
+					{
+						// Don't display "!" alert if already targeting actor
+						if (AIController->GetBlackboardComponent()->GetValueAsObject(TargetActorKey) != InstigatorActor)
+						{
+							ActivateAlertWidget();
+							SetTargetActor(InstigatorActor);
+						}
+						AIController->GetBlackboardComponent()->SetValueAsBool(IsAggroedKey, true);
+					}
 				}
 			}
 		}
