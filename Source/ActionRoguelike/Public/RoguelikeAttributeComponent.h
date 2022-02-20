@@ -9,15 +9,17 @@
 class URoguelikeAttributeComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnHealthChanged, AActor*, InstigatorActor, URoguelikeAttributeComponent*,
-	OwningComp, float, NewHealth, float, Delta);
+                                              OwningComp, float, NewHealth, float, Delta);
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnRageChanged, URoguelikeAttributeComponent*,
+                                             OwningComp, int, NewRage);
+
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class ACTIONROGUELIKE_API URoguelikeAttributeComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:
-
 	URoguelikeAttributeComponent();
 
 	UFUNCTION(BlueprintCallable, Category = "Attributes")
@@ -32,22 +34,41 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Attributes")
 	float GetHealth();
 
-protected:
+	UFUNCTION(BlueprintCallable, Category = "Attributes")
+	float GetMaxRage();
 
+	UFUNCTION(BlueprintCallable, Category = "Attributes")
+	float GetRage();
+
+protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes")
 	float Health;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes")
 	float MaxHealth;
 
-public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes")
+	float Rage;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes")
+	float MaxRage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes")
+	float RageMultiplier;
+
+public:
 	UPROPERTY(BlueprintAssignable)
 	FOnHealthChanged OnHealthChanged;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnRageChanged OnRageChanged;
 
 	// Add/subtract a specified amount of health to the actor, returns action success
 	UFUNCTION(BlueprintCallable, Category = "Attributes")
 	bool ApplyHealthChange(AActor* InstigatorActor, float Delta);
+
+	UFUNCTION(BlueprintCallable)
+	bool SubtractRage(float Delta);
 
 	UFUNCTION(BlueprintCallable)
 	bool IsAlive() const;

@@ -10,23 +10,22 @@ UCLASS(Abstract)
 class ACTIONROGUELIKE_API ARoguelikePickUp : public AActor, public IRoguelikeGameplayInterface
 {
 	GENERATED_BODY()
-	
-public:	
-	
+
+public:
 	ARoguelikePickUp();
 
 protected:
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UStaticMeshComponent* MeshComp;
 
 	FTimerHandle RespawnTimerHandle;
-	
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Respawn")
 	float RespawnTime;
 
 	virtual void SetItemVisible(bool Visible);
 
+	UFUNCTION(BlueprintCallable)
 	virtual void ActivateItemCooldown();
 
 	UFUNCTION()

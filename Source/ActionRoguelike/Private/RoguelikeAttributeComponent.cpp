@@ -19,6 +19,10 @@ URoguelikeAttributeComponent::URoguelikeAttributeComponent()
 {
 	Health = 100.0f;
 	MaxHealth = 100.0f;
+	
+	Rage = 0.0f;
+	MaxRage = 100.0f;
+	RageMultiplier = 0.2f;
 }
 
 URoguelikeAttributeComponent* URoguelikeAttributeComponent::GetAttributes(AActor* FromActor)
@@ -42,19 +46,9 @@ bool URoguelikeAttributeComponent::IsActorAlive(AActor* Actor)
 	return false;
 }
 
-float URoguelikeAttributeComponent::GetMaxHealth()
-{
-	return MaxHealth;
-}
-
-float URoguelikeAttributeComponent::GetHealth()
-{
-	return Health;
-}
-
 bool URoguelikeAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Delta)
 {
-	if (!GetOwner()->CanBeDamaged() && Delta < 0.f)
+	if (!IsAlive() || !GetOwner()->CanBeDamaged() && Delta < 0.f)
 	{
 		return false;
 	}
@@ -74,6 +68,10 @@ bool URoguelikeAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, fl
 			float DamageMultiplier = CVarPlayerDamageMultiplier.GetValueOnGameThread();
 			Delta *= DamageMultiplier;
 		}
+
+		// Add to rage
+		Rage = static_cast<int>(FMath::Clamp(Rage + FMath::Abs(Delta) * RageMultiplier, 0.0f, MaxRage));
+		OnRageChanged.Broadcast(this, Rage);
 	}
 	
 	float OldHealth = Health;
@@ -97,7 +95,44 @@ bool URoguelikeAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, fl
 	return !FMath::IsNearlyZero(HealthDelta);
 }
 
+bool URoguelikeAttributeComponent::SubtractRage(float Delta)
+{
+	if (!ensureAlways(Delta > 0.0f))
+	{
+		return false;
+	}
+
+	if (Rage < Delta)
+	{
+		return false;
+	}
+
+	Rage -= Delta;
+	OnRageChanged.Broadcast(this, Rage);
+	return true;
+}
+
 bool URoguelikeAttributeComponent::IsAlive() const
 {
 	return Health > 0.0f;
+}
+
+float URoguelikeAttributeComponent::GetMaxHealth()
+{
+	return MaxHealth;
+}
+
+float URoguelikeAttributeComponent::GetHealth()
+{
+	return Health;
+}
+
+float URoguelikeAttributeComponent::GetMaxRage()
+{
+	return MaxRage;
+}
+
+float URoguelikeAttributeComponent::GetRage()
+{
+	return Rage;
 }
