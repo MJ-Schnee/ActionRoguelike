@@ -18,9 +18,11 @@ public:
 	void PrimaryInteract();
 
 protected:
+	UFUNCTION(Server, Reliable)
+	void ServerInteract(AActor* InFocusActor);
+
 	void FindBestInteractable();
-	
-	// Called when the game starts
+
 	virtual void BeginPlay() override;
 
 	UPROPERTY()
@@ -42,8 +44,8 @@ protected:
 	URoguelikeWorldUserWidget* DefaultWidgetInstance;
 
 public:
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-	
-	// Sets default values for this component's properties
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
+	                           FActorComponentTickFunction* ThisTickFunction) override;
+
 	URoguelikeInteractionComponent();
 };

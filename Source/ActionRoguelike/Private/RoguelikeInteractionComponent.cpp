@@ -14,7 +14,7 @@ static TAutoConsoleVariable<bool> CVarDrawDebugInteraction(
 URoguelikeInteractionComponent::URoguelikeInteractionComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-	
+
 	TraceDistance = 600.0f;
 	TraceRadius = 30.0f;
 	CollisionChannel = ECC_WorldDynamic;
@@ -26,11 +26,15 @@ void URoguelikeInteractionComponent::BeginPlay()
 }
 
 void URoguelikeInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType,
-												   FActorComponentTickFunction* ThisTickFunction)
+                                                   FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	FindBestInteractable();
+	APawn* OwnerPawn = Cast<APawn>(GetOwner());
+	if (OwnerPawn->IsLocallyControlled())
+	{
+		FindBestInteractable();
+	}
 }
 
 void URoguelikeInteractionComponent::FindBestInteractable()
@@ -80,7 +84,7 @@ void URoguelikeInteractionComponent::FindBestInteractable()
 	{
 		if (DefaultWidgetInstance == nullptr && ensure(DefaultWidgetClass))
 		{
-			DefaultWidgetInstance = CreateWidget<URoguelikeWorldUserWidget>(GetWorld(), DefaultWidgetClass);	
+			DefaultWidgetInstance = CreateWidget<URoguelikeWorldUserWidget>(GetWorld(), DefaultWidgetClass);
 		}
 
 		if (DefaultWidgetInstance)
@@ -89,7 +93,7 @@ void URoguelikeInteractionComponent::FindBestInteractable()
 
 			if (!DefaultWidgetInstance->IsInViewport())
 			{
-				DefaultWidgetInstance->AddToViewport();	
+				DefaultWidgetInstance->AddToViewport();
 			}
 		}
 	}
@@ -109,7 +113,12 @@ void URoguelikeInteractionComponent::FindBestInteractable()
 
 void URoguelikeInteractionComponent::PrimaryInteract()
 {
-	if (FocusedActor == nullptr)
+	ServerInteract(FocusedActor);
+}
+
+void URoguelikeInteractionComponent::ServerInteract_Implementation(AActor* InFocusActor)
+{
+	if (InFocusActor == nullptr)
 	{
 		if (CVarDrawDebugInteraction.GetValueOnGameThread())
 		{
@@ -120,5 +129,5 @@ void URoguelikeInteractionComponent::PrimaryInteract()
 
 	APawn* OwnerPawn = Cast<APawn>(GetOwner());
 
-	IRoguelikeGameplayInterface::Execute_Interact(FocusedActor, OwnerPawn);
+	IRoguelikeGameplayInterface::Execute_Interact(InFocusActor, OwnerPawn);
 }

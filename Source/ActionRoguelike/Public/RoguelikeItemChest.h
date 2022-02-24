@@ -15,26 +15,24 @@ class ACTIONROGUELIKE_API ARoguelikeItemChest : public AActor, public IRoguelike
 	GENERATED_BODY()
 
 public:
-
 	UPROPERTY(EditAnywhere)
 	float TargetPitch;
 	
-protected:
+	void Interact_Implementation(APawn* InstigatorPawn);
 
+protected:
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* BaseMesh;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UStaticMeshComponent* LidMesh;
-	
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-	
-	// Sets default values for this actor's properties
+	UPROPERTY(ReplicatedUsing="OnRep_LidOpened")
+	bool bLidOpened;
+
+	UFUNCTION()
+	void OnRep_LidOpened();
+
+public:
 	ARoguelikeItemChest();
-
 };

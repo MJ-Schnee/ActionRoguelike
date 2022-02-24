@@ -3,12 +3,10 @@
 
 #include "RoguelikeItemChest.h"
 
-// Sets default values
+#include "Net/UnrealNetwork.h"
+
 ARoguelikeItemChest::ARoguelikeItemChest()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
 	BaseMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BaseMesh"));
 	RootComponent = BaseMesh;
 
@@ -16,19 +14,25 @@ ARoguelikeItemChest::ARoguelikeItemChest()
 	LidMesh->SetupAttachment(BaseMesh);
 
 	TargetPitch = 110;
+
+	SetReplicates(true);
 }
 
-// Called when the game starts or when spawned
-void ARoguelikeItemChest::BeginPlay()
+void ARoguelikeItemChest::Interact_Implementation(APawn* InstigatorPawn)
 {
-	Super::BeginPlay();
-	
+	bLidOpened = !bLidOpened;
+	OnRep_LidOpened();
 }
 
-// Called every frame
-void ARoguelikeItemChest::Tick(float DeltaTime)
+void ARoguelikeItemChest::OnRep_LidOpened()
 {
-	Super::Tick(DeltaTime);
-
+	float CurrPitch = bLidOpened ? TargetPitch : 0.0f;
+	LidMesh->SetRelativeRotation(FRotator(CurrPitch, 0, 0));
 }
 
+void ARoguelikeItemChest::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ARoguelikeItemChest, bLidOpened);
+}
