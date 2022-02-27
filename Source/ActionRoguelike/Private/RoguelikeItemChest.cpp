@@ -15,7 +15,7 @@ ARoguelikeItemChest::ARoguelikeItemChest()
 
 	TargetPitch = 110;
 
-	SetReplicates(true);
+	bReplicates = true;
 }
 
 void ARoguelikeItemChest::Interact_Implementation(APawn* InstigatorPawn)

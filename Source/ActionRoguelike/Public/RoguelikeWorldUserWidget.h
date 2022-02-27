@@ -14,15 +14,13 @@ class ACTIONROGUELIKE_API URoguelikeWorldUserWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	
-	UPROPERTY(BlueprintReadOnly, Category = "UI")
+	UPROPERTY(BlueprintReadWrite, Category = "UI", meta = (ExposeOnSpawn = true))
 	AActor* AttachedActor;
-	
+
 	UPROPERTY(EditAnywhere, Category = "UI")
 	FVector WorldOffset;
 
 protected:
-
 	UPROPERTY(meta = (BindWidget))
 	USizeBox* ParentSizeBox;
 

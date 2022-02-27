@@ -7,8 +7,10 @@ ARoguelikePickUp::ARoguelikePickUp()
 {
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>("MeshComp");
 	RootComponent = MeshComp;
-	
+
 	RespawnTime = 10.0f;
+
+	bReplicates = true;
 }
 
 void ARoguelikePickUp::SetItemVisible(bool Visible)
@@ -22,9 +24,9 @@ void ARoguelikePickUp::ActivateItemCooldown()
 	if (RespawnTime > 0.f)
 	{
 		SetItemVisible(false);
-	
+
 		GetWorldTimerManager().SetTimer(RespawnTimerHandle, this,
-			&ARoguelikePickUp::RespawnItem, RespawnTime);	
+		                                &ARoguelikePickUp::RespawnItem, RespawnTime);
 	}
 	else
 	{

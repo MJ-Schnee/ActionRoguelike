@@ -6,32 +6,39 @@
 #include "RoguelikeCharacter.h"
 #include "RoguelikeGameModeBase.h"
 #include "AI/RoguelikeAICharacter.h"
+#include "Net/UnrealNetwork.h"
 
 
 static TAutoConsoleVariable<float> CVarAIDamageMultiplier(TEXT("rl.AIDamageMultiplier"), 1.f,
-	TEXT("Multiplies damage done by AI in attribute component."), ECVF_Cheat);
+                                                          TEXT("Multiplies damage done by AI in attribute component."),
+                                                          ECVF_Cheat);
 
 static TAutoConsoleVariable<float> CVarPlayerDamageMultiplier(TEXT("rl.PlayerDamageMultiplier"), 1.f,
-	TEXT("Multiplies damage done by Players in attribute component."), ECVF_Cheat);
+                                                              TEXT(
+	                                                              "Multiplies damage done by Players in attribute component."),
+                                                              ECVF_Cheat);
 
 // Sets default values for this component's properties
 URoguelikeAttributeComponent::URoguelikeAttributeComponent()
 {
 	Health = 100.0f;
 	MaxHealth = 100.0f;
-	
+
 	Rage = 0.0f;
 	MaxRage = 100.0f;
 	RageMultiplier = 0.2f;
+
+	SetIsReplicatedByDefault(true);
 }
 
 URoguelikeAttributeComponent* URoguelikeAttributeComponent::GetAttributes(AActor* FromActor)
 {
 	if (FromActor)
 	{
-		return Cast<URoguelikeAttributeComponent>(FromActor->GetComponentByClass(URoguelikeAttributeComponent::StaticClass()));
+		return Cast<URoguelikeAttributeComponent>(
+			FromActor->GetComponentByClass(URoguelikeAttributeComponent::StaticClass()));
 	}
-	
+
 	return nullptr;
 }
 
@@ -61,7 +68,7 @@ bool URoguelikeAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, fl
 			float DamageMultiplier = CVarAIDamageMultiplier.GetValueOnGameThread();
 			Delta *= DamageMultiplier;
 		}
-		
+
 		ARoguelikeCharacter* Player = Cast<ARoguelikeCharacter>(InstigatorActor);
 		if (Player)
 		{
@@ -73,14 +80,17 @@ bool URoguelikeAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, fl
 		Rage = static_cast<int>(FMath::Clamp(Rage + FMath::Abs(Delta) * RageMultiplier, 0.0f, MaxRage));
 		OnRageChanged.Broadcast(this, Rage);
 	}
-	
+
 	float OldHealth = Health;
 
 	Health = FMath::Clamp(Health + Delta, 0.0f, MaxHealth);
 
 	float HealthDelta = Health - OldHealth;
 
-	OnHealthChanged.Broadcast(InstigatorActor, this, Health, HealthDelta);
+	if (!FMath::IsNearlyZero(HealthDelta))
+	{
+		MulticastHealthChanged(InstigatorActor, Health, HealthDelta);
+	}
 
 	// Died
 	if (HealthDelta < 0.f && FMath::IsNearlyZero(Health))
@@ -115,6 +125,22 @@ bool URoguelikeAttributeComponent::SubtractRage(float Delta)
 bool URoguelikeAttributeComponent::IsAlive() const
 {
 	return Health > 0.0f;
+}
+
+void URoguelikeAttributeComponent::MulticastHealthChanged_Implementation(AActor* InstigatorActor, float NewHealth,
+                                                                         float Delta)
+{
+	OnHealthChanged.Broadcast(InstigatorActor, this, NewHealth, Delta);
+}
+
+void URoguelikeAttributeComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(URoguelikeAttributeComponent, Health);
+	DOREPLIFETIME(URoguelikeAttributeComponent, MaxHealth);
+	DOREPLIFETIME(URoguelikeAttributeComponent, Rage);
+	DOREPLIFETIME(URoguelikeAttributeComponent, MaxRage);
 }
 
 float URoguelikeAttributeComponent::GetMaxHealth()
