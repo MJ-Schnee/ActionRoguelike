@@ -10,6 +10,8 @@ static TAutoConsoleVariable<bool> CVarDebugActionComponent(
 URoguelikeActionComponent::URoguelikeActionComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+
+	SetIsReplicatedByDefault(true);
 }
 
 void URoguelikeActionComponent::BeginPlay()
@@ -63,6 +65,11 @@ void URoguelikeActionComponent::RemoveAction(URoguelikeAction* ActionToRemove)
 	Actions.Remove(ActionToRemove);
 }
 
+void URoguelikeActionComponent::ServerStartAction_Implementation(AActor* Instigator, FName ActionName)
+{
+	StartActionByName(Instigator, ActionName);
+}
+
 bool URoguelikeActionComponent::StartActionByName(AActor* Instigator, FName ActionName)
 {
 	for (URoguelikeAction* Action : Actions)
@@ -77,6 +84,12 @@ bool URoguelikeActionComponent::StartActionByName(AActor* Instigator, FName Acti
 					GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FailedMsg);
 				}
 				continue;
+			}
+
+			// Call server RPC if client
+			if (!GetOwner()->HasAuthority())
+			{
+				ServerStartAction(Instigator, ActionName);	
 			}
 
 			Action->StartAction(Instigator);
