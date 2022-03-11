@@ -25,7 +25,7 @@ protected:
 
 	virtual void SetItemVisible(bool Visible);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, NetMulticast, Reliable)
 	virtual void ActivateItemCooldown();
 
 	UFUNCTION()

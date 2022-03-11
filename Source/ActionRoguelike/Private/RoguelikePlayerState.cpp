@@ -3,6 +3,13 @@
 
 #include "RoguelikePlayerState.h"
 
+#include "Net/UnrealNetwork.h"
+
+void ARoguelikePlayerState::MulticastCreditsChanged_Implementation(ARoguelikePlayerState* PlayerState, int32 NewCredits, int32 Delta)
+{
+	OnCreditsChanged.Broadcast(PlayerState, NewCredits, Delta);
+}
+
 void ARoguelikePlayerState::AddCredits(int32 Delta)
 {
 	if (!ensure(Delta > 0))
@@ -12,12 +19,17 @@ void ARoguelikePlayerState::AddCredits(int32 Delta)
 	
 	Credits += Delta;
 
-	OnCreditsChanged.Broadcast(this, Credits, Delta);
+	MulticastCreditsChanged(this, Credits, Delta);
+
+	if (!HasAuthority())
+	{
+		UE_LOG(LogTemp, Log, TEXT("Client credits: %f"), Credits);
+	}
 }
 
 bool ARoguelikePlayerState::RemoveCredits(int32 Delta)
 {
-	if (!ensure(Delta > 0))
+	if (!ensure(Delta >= 0))
 	{
 		return false;
 	}
@@ -29,7 +41,7 @@ bool ARoguelikePlayerState::RemoveCredits(int32 Delta)
 	
 	Credits -= Delta;
 
-	OnCreditsChanged.Broadcast(this, Credits, -Delta);
+	MulticastCreditsChanged(this, Credits, Delta);
 
 	return true;
 }
@@ -37,4 +49,11 @@ bool ARoguelikePlayerState::RemoveCredits(int32 Delta)
 int32 ARoguelikePlayerState::GetCredits() const
 {
 	return Credits;
+}
+
+void ARoguelikePlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ARoguelikePlayerState, Credits);
 }

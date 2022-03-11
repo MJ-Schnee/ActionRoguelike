@@ -25,9 +25,9 @@ void URoguelikeActionEffect_Thorns::OnHealthChanged(AActor* InstigatorActor, URo
 
 	URoguelikeAttributeComponent* InstigatorAttributeComp =
 		URoguelikeAttributeComponent::GetAttributes(InstigatorActor);
-	if (InstigatorAttributeComp)
+	if (InstigatorAttributeComp && Delta < 0.0f)
 	{
-		int ReflectedDamage = static_cast<int>(Delta * PercentDamageReflected);
+		int ReflectedDamage = FMath::RoundToInt(Delta * PercentDamageReflected);
 		InstigatorAttributeComp->ApplyHealthChange(InstigatorActor, ReflectedDamage);
 	}
 }

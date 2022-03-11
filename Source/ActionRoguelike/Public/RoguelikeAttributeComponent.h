@@ -11,8 +11,7 @@ class URoguelikeAttributeComponent;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnHealthChanged, AActor*, InstigatorActor, URoguelikeAttributeComponent*,
                                               OwningComp, float, NewHealth, float, Delta);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnRageChanged, URoguelikeAttributeComponent*,
-                                             OwningComp, int, NewRage);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnRageChanged, URoguelikeAttributeComponent*, OwningComp, int, NewRage);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class ACTIONROGUELIKE_API URoguelikeAttributeComponent : public UActorComponent
@@ -58,6 +57,9 @@ protected:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastHealthChanged(AActor* InstigatorActor, float NewHealth, float Delta);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRageChanged(URoguelikeAttributeComponent* OwningComp, int NewRage);
 
 public:
 	UPROPERTY(BlueprintAssignable)

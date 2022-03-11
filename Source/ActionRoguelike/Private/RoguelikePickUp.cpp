@@ -19,7 +19,7 @@ void ARoguelikePickUp::SetItemVisible(bool Visible)
 	SetActorEnableCollision(Visible);
 }
 
-void ARoguelikePickUp::ActivateItemCooldown()
+void ARoguelikePickUp::ActivateItemCooldown_Implementation()
 {
 	if (RespawnTime > 0.f)
 	{

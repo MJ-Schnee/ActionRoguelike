@@ -47,6 +47,7 @@ protected:
 	void SetTargetActor(AActor* NewTarget);
 
 	// Activates the "!" alert widget
+	UFUNCTION(NetMulticast, Unreliable)
 	void ActivateAlertWidget();
 
 	UFUNCTION()

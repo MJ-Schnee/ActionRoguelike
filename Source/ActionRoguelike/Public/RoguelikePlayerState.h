@@ -6,6 +6,8 @@
 #include "GameFramework/PlayerState.h"
 #include "RoguelikePlayerState.generated.h"
 
+class ARoguelikePlayerState;
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnCreditsChanged, ARoguelikePlayerState*, PlayerState, int32,
                                                NewCredits, int32, Delta);
 
@@ -15,8 +17,11 @@ class ACTIONROGUELIKE_API ARoguelikePlayerState : public APlayerState
 	GENERATED_BODY()
 
 protected:
-	UPROPERTY(EditDefaultsOnly, Category = "Credits")
+	UPROPERTY(EditDefaultsOnly, Replicated, Category = "Credits")
 	int32 Credits;
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastCreditsChanged(ARoguelikePlayerState* PlayerState, int32 NewCredits, int32 Delta);
 
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")

@@ -128,9 +128,14 @@ bool URoguelikeAttributeComponent::IsAlive() const
 }
 
 void URoguelikeAttributeComponent::MulticastHealthChanged_Implementation(AActor* InstigatorActor, float NewHealth,
-                                                                         float Delta)
+																		 float Delta)
 {
 	OnHealthChanged.Broadcast(InstigatorActor, this, NewHealth, Delta);
+}
+
+void URoguelikeAttributeComponent::MulticastRageChanged_Implementation(URoguelikeAttributeComponent* OwningComp, int NewRage)
+{
+	OnRageChanged.Broadcast(OwningComp, NewRage);
 }
 
 void URoguelikeAttributeComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

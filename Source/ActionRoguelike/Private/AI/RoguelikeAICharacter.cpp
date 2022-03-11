@@ -48,7 +48,7 @@ void ARoguelikeAICharacter::SetTargetActor(AActor* NewTarget)
 	}
 }
 
-void ARoguelikeAICharacter::ActivateAlertWidget()
+void ARoguelikeAICharacter::ActivateAlertWidget_Implementation()
 {
 	if (ensure(SeenPlayerWidgetClass))
 	{
