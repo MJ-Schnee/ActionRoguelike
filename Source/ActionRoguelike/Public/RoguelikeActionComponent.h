@@ -35,6 +35,8 @@ public:
 
 	URoguelikeActionComponent();
 
+	bool ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags) override;
+
 protected:
 	UFUNCTION(Server, Reliable)
 	void ServerStartAction(AActor* Instigator, FName ActionName);
@@ -42,7 +44,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Actions")
 	TArray<TSubclassOf<URoguelikeAction>> DefaultActions;
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	TArray<URoguelikeAction*> Actions;
 
 	virtual void BeginPlay() override;

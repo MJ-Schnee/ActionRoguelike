@@ -4,6 +4,8 @@
 #include "RoguelikeAction.h"
 
 #include "RoguelikeActionComponent.h"
+#include "ActionRoguelike/ActionRoguelike.h"
+#include "Net/UnrealNetwork.h"
 
 bool URoguelikeAction::CanStart_Implementation(AActor* Instigator)
 {
@@ -24,7 +26,7 @@ bool URoguelikeAction::CanStart_Implementation(AActor* Instigator)
 
 void URoguelikeAction::StartAction_Implementation(AActor* Instigator)
 {
-	UE_LOG(LogTemp, Log, TEXT("Action \"%s\" has been started"), *GetNameSafe(this));
+	LogOnScreen(this, FString::Printf(TEXT("Started  %s"), *ActionName.ToString()), FColor::Green);
 
 	URoguelikeActionComponent* OwningComp = GetOwningComponent();
 	OwningComp->ActiveGameplayTags.AppendTags(GrantsTags);
@@ -34,9 +36,7 @@ void URoguelikeAction::StartAction_Implementation(AActor* Instigator)
 
 void URoguelikeAction::StopAction_Implementation(AActor* Instigator)
 {
-	UE_LOG(LogTemp, Log, TEXT("Action \"%s\" has been stopped"), *GetNameSafe(this));
-
-	ensureAlways(bIsRunning);
+	LogOnScreen(this, FString::Printf(TEXT("Stopped %s"), *ActionName.ToString()), FColor::White);
 
 	URoguelikeActionComponent* OwningComp = GetOwningComponent();
 	OwningComp->ActiveGameplayTags.RemoveTags(GrantsTags);
@@ -46,10 +46,10 @@ void URoguelikeAction::StopAction_Implementation(AActor* Instigator)
 
 UWorld* URoguelikeAction::GetWorld() const
 {
-	UActorComponent* Comp = Cast<UActorComponent>(GetOuter());
-	if (Comp)
+	AActor* Actor = Cast<AActor>(GetOuter());
+	if (Actor)
 	{
-		return Comp->GetWorld();
+		return Actor->GetWorld();
 	}
 
 	return nullptr;
@@ -57,10 +57,35 @@ UWorld* URoguelikeAction::GetWorld() const
 
 URoguelikeActionComponent* URoguelikeAction::GetOwningComponent() const
 {
-	return Cast<URoguelikeActionComponent>(GetOuter());
+	return ActionComp;
+}
+
+void URoguelikeAction::OnRep_IsRunning()
+{
+	if (bIsRunning)
+	{
+		StartAction(nullptr);
+	}
+	else
+	{
+		StopAction(nullptr);
+	}
+}
+
+void URoguelikeAction::Initialize(URoguelikeActionComponent* NewActionComp)
+{
+	ActionComp = NewActionComp;
 }
 
 bool URoguelikeAction::IsRunning() const
 {
 	return bIsRunning;
+}
+
+void URoguelikeAction::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(URoguelikeAction, bIsRunning);
+	DOREPLIFETIME(URoguelikeAction, ActionComp);
 }

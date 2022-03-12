@@ -3,6 +3,9 @@
 
 #include "RoguelikeActionComponent.h"
 #include "RoguelikeAction.h"
+#include "ActionRoguelike/ActionRoguelike.h"
+#include "Engine/ActorChannel.h"
+#include "Net/UnrealNetwork.h"
 
 static TAutoConsoleVariable<bool> CVarDebugActionComponent(
 	TEXT("rl.DebugActionComponent"), false, TEXT("Show debug messages from the Action Component."), ECVF_Cheat);
@@ -14,13 +17,31 @@ URoguelikeActionComponent::URoguelikeActionComponent()
 	SetIsReplicatedByDefault(true);
 }
 
+bool URoguelikeActionComponent::ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch,
+	FReplicationFlags* RepFlags)
+{
+	bool WroteSomething = Super::ReplicateSubobjects(Channel, Bunch, RepFlags);
+	for (URoguelikeAction* Action : Actions)
+	{
+		if (Action)
+		{
+			WroteSomething |= Channel->ReplicateSubobject(Action, *Bunch, *RepFlags);
+		}
+	}
+
+	return WroteSomething;
+}
+
 void URoguelikeActionComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	for (TSubclassOf<URoguelikeAction> ActionClass : DefaultActions)
+	if (GetOwner()->HasAuthority())
 	{
-		AddAction(GetOwner(), ActionClass);
+		for (TSubclassOf<URoguelikeAction> ActionClass : DefaultActions)
+		{
+			AddAction(GetOwner(), ActionClass);
+		}
 	}
 }
 
@@ -29,10 +50,18 @@ void URoguelikeActionComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (CVarDebugActionComponent.GetValueOnGameThread())
+	// Draw All Actions
+	for (URoguelikeAction* Action : Actions)
 	{
-		FString DebugMsg = GetNameSafe(GetOwner()) + " : " + ActiveGameplayTags.ToStringSimple();
-		GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::White, DebugMsg);
+		FColor TextColor = Action->IsRunning() ? FColor::Blue : FColor::White;
+
+		FString ActionMsg = FString::Printf(TEXT("[%s] Action %s : IsRunning: %s : Outer: %s"),
+			*GetNameSafe(GetOwner()),
+			*Action->ActionName.ToString(),
+			Action->IsRunning() ? TEXT("true") : TEXT("false"),
+			*GetNameSafe(Action->GetOuter()));
+
+		LogOnScreen(this, ActionMsg, TextColor, 0.0f);
 	}
 }
 
@@ -43,9 +72,11 @@ void URoguelikeActionComponent::AddAction(AActor* Instigator, TSubclassOf<URogue
 		return;
 	}
 
-	URoguelikeAction* NewAction = NewObject<URoguelikeAction>(this, ActionClass);
+	URoguelikeAction* NewAction = NewObject<URoguelikeAction>(GetOwner(), ActionClass);
 	if (ensure(NewAction))
 	{
+		NewAction->Initialize(this);
+		
 		Actions.Add(NewAction);
 
 		if (NewAction->bAutoStart && ensure(NewAction->CanStart(Instigator)))
@@ -115,4 +146,11 @@ bool URoguelikeActionComponent::StopActionByName(AActor* Instigator, FName Actio
 	}
 
 	return false;
+}
+
+void URoguelikeActionComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(URoguelikeActionComponent, Actions);
 }
