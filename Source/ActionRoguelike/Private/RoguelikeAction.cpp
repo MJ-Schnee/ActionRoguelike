@@ -31,7 +31,8 @@ void URoguelikeAction::StartAction_Implementation(AActor* Instigator)
 	URoguelikeActionComponent* OwningComp = GetOwningComponent();
 	OwningComp->ActiveGameplayTags.AppendTags(GrantsTags);
 
-	bIsRunning = true;
+	RepData.bIsRunning = true;
+	RepData.Instigator = Instigator;
 }
 
 void URoguelikeAction::StopAction_Implementation(AActor* Instigator)
@@ -41,7 +42,8 @@ void URoguelikeAction::StopAction_Implementation(AActor* Instigator)
 	URoguelikeActionComponent* OwningComp = GetOwningComponent();
 	OwningComp->ActiveGameplayTags.RemoveTags(GrantsTags);
 
-	bIsRunning = false;
+	RepData.bIsRunning = false;
+	RepData.Instigator = Instigator;
 }
 
 UWorld* URoguelikeAction::GetWorld() const
@@ -60,15 +62,15 @@ URoguelikeActionComponent* URoguelikeAction::GetOwningComponent() const
 	return ActionComp;
 }
 
-void URoguelikeAction::OnRep_IsRunning()
+void URoguelikeAction::OnRep_RepData()
 {
-	if (bIsRunning)
+	if (RepData.bIsRunning)
 	{
-		StartAction(nullptr);
+		StartAction(RepData.Instigator);
 	}
 	else
 	{
-		StopAction(nullptr);
+		StopAction(RepData.Instigator);
 	}
 }
 
@@ -79,13 +81,13 @@ void URoguelikeAction::Initialize(URoguelikeActionComponent* NewActionComp)
 
 bool URoguelikeAction::IsRunning() const
 {
-	return bIsRunning;
+	return RepData.bIsRunning;
 }
 
 void URoguelikeAction::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(URoguelikeAction, bIsRunning);
+	DOREPLIFETIME(URoguelikeAction, RepData);
 	DOREPLIFETIME(URoguelikeAction, ActionComp);
 }

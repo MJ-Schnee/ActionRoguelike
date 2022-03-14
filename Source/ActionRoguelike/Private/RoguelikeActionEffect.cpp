@@ -43,8 +43,7 @@ void URoguelikeActionEffect::StopAction_Implementation(AActor* Instigator)
 	GetWorld()->GetTimerManager().ClearTimer(DurationHandle);
 	GetWorld()->GetTimerManager().ClearTimer(PeriodHandle);
 
-	URoguelikeActionComponent* ActionComp = GetOwningComponent();
-	if (ActionComp)
+	if (ActionComp != nullptr)
 	{
 		ActionComp->RemoveAction(this);
 	}

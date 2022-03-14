@@ -60,6 +60,7 @@ bool URoguelikeAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, fl
 		return false;
 	}
 
+	// Damage scaling
 	if (Delta < 0.f)
 	{
 		ARoguelikeAICharacter* AICharacter = Cast<ARoguelikeAICharacter>(InstigatorActor);
@@ -75,30 +76,41 @@ bool URoguelikeAttributeComponent::ApplyHealthChange(AActor* InstigatorActor, fl
 			float DamageMultiplier = CVarPlayerDamageMultiplier.GetValueOnGameThread();
 			Delta *= DamageMultiplier;
 		}
-
-		// Add to rage
-		Rage = static_cast<int>(FMath::Clamp(Rage + FMath::Abs(Delta) * RageMultiplier, 0.0f, MaxRage));
-		OnRageChanged.Broadcast(this, Rage);
 	}
 
 	float OldHealth = Health;
+	float NewHealth = FMath::Clamp(Health + Delta, 0.0f, MaxHealth);
+	float HealthDelta = NewHealth - OldHealth;
 
-	Health = FMath::Clamp(Health + Delta, 0.0f, MaxHealth);
-
-	float HealthDelta = Health - OldHealth;
-
-	if (!FMath::IsNearlyZero(HealthDelta))
+	// Only server will actually change values
+	if (GetOwner()->HasAuthority())
 	{
-		MulticastHealthChanged(InstigatorActor, Health, HealthDelta);
-	}
-
-	// Died
-	if (HealthDelta < 0.f && FMath::IsNearlyZero(Health))
-	{
-		ARoguelikeGameModeBase* GameMode = GetWorld()->GetAuthGameMode<ARoguelikeGameModeBase>();
-		if (GameMode)
+		// Change health
+		if (!FMath::IsNearlyZero(HealthDelta))
 		{
-			GameMode->OnActorKilled(GetOwner(), InstigatorActor);
+			Health = NewHealth;
+			MulticastHealthChanged(InstigatorActor, NewHealth, HealthDelta);
+		}
+
+		// Change rage
+		if (Delta <= 0.0f)
+		{
+			float NewRage = static_cast<int>(FMath::Clamp(Rage + FMath::Abs(Delta) * RageMultiplier, 0.0f, MaxRage));
+			if (GetOwner()->HasAuthority())
+			{
+				Rage = NewRage;
+				MulticastRageChanged(this, Rage);
+			}
+		}
+
+		// Died
+		if (HealthDelta < 0.f && FMath::IsNearlyZero(NewHealth))
+		{
+			ARoguelikeGameModeBase* GameMode = GetWorld()->GetAuthGameMode<ARoguelikeGameModeBase>();
+			if (GameMode)
+			{
+				GameMode->OnActorKilled(GetOwner(), InstigatorActor);
+			}
 		}
 	}
 
@@ -128,12 +140,13 @@ bool URoguelikeAttributeComponent::IsAlive() const
 }
 
 void URoguelikeAttributeComponent::MulticastHealthChanged_Implementation(AActor* InstigatorActor, float NewHealth,
-																		 float Delta)
+                                                                         float Delta)
 {
 	OnHealthChanged.Broadcast(InstigatorActor, this, NewHealth, Delta);
 }
 
-void URoguelikeAttributeComponent::MulticastRageChanged_Implementation(URoguelikeAttributeComponent* OwningComp, int NewRage)
+void URoguelikeAttributeComponent::MulticastRageChanged_Implementation(URoguelikeAttributeComponent* OwningComp,
+                                                                       int NewRage)
 {
 	OnRageChanged.Broadcast(OwningComp, NewRage);
 }

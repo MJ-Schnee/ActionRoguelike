@@ -61,7 +61,7 @@ void ARoguelikeMagicProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedCo
 		{
 			Explode();
 
-			if (ActionComp)
+			if (ActionComp && HasAuthority())
 			{
 				ActionComp->AddAction(GetInstigator(), DamageEffectClass);
 			}

@@ -7,6 +7,20 @@
 #include "RoguelikeAction.generated.h"
 
 class URoguelikeActionComponent;
+
+USTRUCT()
+struct FActionRepData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY()
+	bool bIsRunning;
+
+	UPROPERTY()
+	AActor* Instigator;
+};
+
 UCLASS(Blueprintable)
 class ACTIONROGUELIKE_API URoguelikeAction : public UObject
 {
@@ -15,7 +29,7 @@ class ACTIONROGUELIKE_API URoguelikeAction : public UObject
 protected:
 	UPROPERTY(Replicated)
 	URoguelikeActionComponent* ActionComp;
-	
+
 	UFUNCTION(BlueprintCallable, Category = "Actions")
 	URoguelikeActionComponent* GetOwningComponent() const;
 
@@ -27,18 +41,18 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Tags")
 	FGameplayTagContainer BlockedTags;
 
-	UPROPERTY(ReplicatedUsing="OnRep_IsRunning")
-	bool bIsRunning;
+	UPROPERTY(ReplicatedUsing="OnRep_RepData")
+	FActionRepData RepData;
 
 	UFUNCTION()
-	void OnRep_IsRunning();
+	void OnRep_RepData();
 
 public:
 	void Initialize(URoguelikeActionComponent* NewActionComp);
-	
+
 	UPROPERTY(EditDefaultsOnly, Category = "Actions")
 	bool bAutoStart;
-	
+
 	UFUNCTION(BlueprintCallable, Category = "Actions")
 	bool IsRunning() const;
 
