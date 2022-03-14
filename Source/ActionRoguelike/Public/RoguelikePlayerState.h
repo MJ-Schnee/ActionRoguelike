@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "RoguelikeSaveGame.h"
 #include "GameFramework/PlayerState.h"
 #include "RoguelikePlayerState.generated.h"
 
@@ -35,4 +36,10 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	int32 GetCredits() const;
+
+	UFUNCTION(BlueprintNativeEvent)
+	void SavePlayerState(URoguelikeSaveGame* SaveObject);
+
+	UFUNCTION(BlueprintNativeEvent)
+	void LoadPlayerState(URoguelikeSaveGame* SaveObject);
 };

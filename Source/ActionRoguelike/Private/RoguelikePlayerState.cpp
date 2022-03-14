@@ -5,7 +5,8 @@
 
 #include "Net/UnrealNetwork.h"
 
-void ARoguelikePlayerState::MulticastCreditsChanged_Implementation(ARoguelikePlayerState* PlayerState, int32 NewCredits, int32 Delta)
+void ARoguelikePlayerState::MulticastCreditsChanged_Implementation(ARoguelikePlayerState* PlayerState, int32 NewCredits,
+                                                                   int32 Delta)
 {
 	OnCreditsChanged.Broadcast(PlayerState, NewCredits, Delta);
 }
@@ -16,7 +17,7 @@ void ARoguelikePlayerState::AddCredits(int32 Delta)
 	{
 		return;
 	}
-	
+
 	Credits += Delta;
 
 	MulticastCreditsChanged(this, Credits, Delta);
@@ -38,7 +39,7 @@ bool ARoguelikePlayerState::RemoveCredits(int32 Delta)
 	{
 		return false;
 	}
-	
+
 	Credits -= Delta;
 
 	MulticastCreditsChanged(this, Credits, Delta);
@@ -49,6 +50,22 @@ bool ARoguelikePlayerState::RemoveCredits(int32 Delta)
 int32 ARoguelikePlayerState::GetCredits() const
 {
 	return Credits;
+}
+
+void ARoguelikePlayerState::SavePlayerState_Implementation(URoguelikeSaveGame* SaveObject)
+{
+	if (SaveObject)
+	{
+		SaveObject->Credits = Credits;
+	}
+}
+
+void ARoguelikePlayerState::LoadPlayerState_Implementation(URoguelikeSaveGame* SaveObject)
+{
+	if (SaveObject)
+	{
+		Credits = SaveObject->Credits;
+	}
 }
 
 void ARoguelikePlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

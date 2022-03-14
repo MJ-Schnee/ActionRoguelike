@@ -7,6 +7,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "RoguelikeGameModeBase.generated.h"
 
+class URoguelikeSaveGame;
 class UEnvQueryInstanceBlueprintWrapper;
 class UEnvQuery;
 
@@ -22,7 +23,21 @@ public:
 
 	virtual void OnActorKilled(AActor* VictimActor, AActor* KillerActor);
 
+	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
+
+	UFUNCTION(BlueprintCallable, Category = "SaveGame")
+	void WriteSaveGame();
+
+	void LoadSaveGame();
+
+	virtual void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
+
 protected:
+	UPROPERTY()
+	URoguelikeSaveGame* CurrentSaveGame;
+
+	FString SlotName;
+
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	TSubclassOf<AActor> MinionClass;
 

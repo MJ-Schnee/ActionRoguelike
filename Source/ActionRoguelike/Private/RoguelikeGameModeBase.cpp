@@ -7,8 +7,11 @@
 #include "RoguelikeAttributeComponent.h"
 #include "RoguelikeCharacter.h"
 #include "RoguelikePlayerState.h"
+#include "RoguelikeSaveGame.h"
 #include "AI/RoguelikeAICharacter.h"
 #include "EnvironmentQuery/EnvQueryManager.h"
+#include "GameFramework/GameStateBase.h"
+#include "Kismet/GameplayStatics.h"
 
 
 static TAutoConsoleVariable<bool> CVarSpawnBots(TEXT("rl.SpawnBots"), true,
@@ -19,6 +22,8 @@ ARoguelikeGameModeBase::ARoguelikeGameModeBase()
 	BotSpawnTimerInterval = 2.0f;
 
 	CreditAmountKillMinion = 5.0f;
+
+	SlotName = "SaveGame01";
 }
 
 void ARoguelikeGameModeBase::StartPlay()
@@ -65,6 +70,58 @@ void ARoguelikeGameModeBase::OnActorKilled(AActor* VictimActor, AActor* KillerAc
 				PlayerState->AddCredits(CreditAmountKillMinion);
 			}
 		}
+	}
+}
+
+void ARoguelikeGameModeBase::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
+{
+	Super::InitGame(MapName, Options, ErrorMessage);
+
+	LoadSaveGame();
+}
+
+void ARoguelikeGameModeBase::WriteSaveGame()
+{
+	// No player ID system, only save state of first player
+	ARoguelikePlayerState* PlayerState = Cast<ARoguelikePlayerState>(GameState->PlayerArray[0]);
+	if (PlayerState)
+	{
+		PlayerState->SavePlayerState(CurrentSaveGame);
+	}
+
+	UGameplayStatics::SaveGameToSlot(CurrentSaveGame, SlotName, 0);
+}
+
+void ARoguelikeGameModeBase::LoadSaveGame()
+{
+	if (UGameplayStatics::DoesSaveGameExist(SlotName, 0))
+	{
+		CurrentSaveGame = Cast<URoguelikeSaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName, 0));
+		if (CurrentSaveGame == nullptr)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Failed to load SaveGame Data."));
+			return;
+		}
+
+		UE_LOG(LogTemp, Log, TEXT("Loaded SaveGame Data."));
+	}
+	else
+	{
+		CurrentSaveGame = Cast<URoguelikeSaveGame>(
+			UGameplayStatics::CreateSaveGameObject(URoguelikeSaveGame::StaticClass()));
+
+		UE_LOG(LogTemp, Log, TEXT("Created New SaveGame Data."));
+	}
+}
+
+void ARoguelikeGameModeBase::HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer)
+{
+	Super::HandleStartingNewPlayer_Implementation(NewPlayer);
+
+	ARoguelikePlayerState* PlayerState = NewPlayer->GetPlayerState<ARoguelikePlayerState>();
+	if (PlayerState)
+	{
+		PlayerState->LoadPlayerState(CurrentSaveGame);
 	}
 }
 
