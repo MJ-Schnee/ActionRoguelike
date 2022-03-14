@@ -14,7 +14,7 @@
 
 ARoguelikeCharacter::ARoguelikeCharacter()
 {
- 	// Disable calling Tick() to improve performance
+	// Disable calling Tick() to improve performance
 	PrimaryActorTick.bCanEverTick = false;
 
 	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>("SpringArmComp");
@@ -48,7 +48,6 @@ FVector ARoguelikeCharacter::GetPawnViewLocation() const
 void ARoguelikeCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 void ARoguelikeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -63,7 +62,7 @@ void ARoguelikeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 
 	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
-	
+
 	PlayerInputComponent->BindAction("PrimaryInteract", IE_Pressed, this, &ARoguelikeCharacter::PrimaryInteract);
 
 	PlayerInputComponent->BindAction("PrimaryAttack", IE_Pressed, this, &ARoguelikeCharacter::PrimaryAttack);
@@ -76,7 +75,7 @@ void ARoguelikeCharacter::MoveForward(float Value)
 	FRotator ControlRot = GetControlRotation();
 	ControlRot.Pitch = 0.0f;
 	ControlRot.Roll = 0.0f;
-	
+
 	AddMovementInput(ControlRot.Vector(), Value);
 }
 
@@ -87,7 +86,7 @@ void ARoguelikeCharacter::MoveRight(float Value)
 	ControlRot.Roll = 0.0f;
 
 	FVector RightVector = FRotationMatrix(ControlRot).GetScaledAxis(EAxis::Y);
-	
+
 	AddMovementInput(RightVector, Value);
 }
 
@@ -105,7 +104,7 @@ void ARoguelikeCharacter::PrimaryInteract()
 {
 	if (InteractionComp)
 	{
-		InteractionComp->PrimaryInteract();	
+		InteractionComp->PrimaryInteract();
 	}
 }
 
@@ -124,16 +123,19 @@ void ARoguelikeCharacter::TeleportAbility()
 	ActionComp->StartActionByName(this, "TeleportAbility");
 }
 
-void ARoguelikeCharacter::OnHealthChanged(AActor* InstigatorActor, URoguelikeAttributeComponent* OwningComp, float NewHealth, float Delta)
+void ARoguelikeCharacter::OnHealthChanged(AActor* InstigatorActor, URoguelikeAttributeComponent* OwningComp,
+                                          float NewHealth, float Delta)
 {
 	if (Delta < 0.0f && NewHealth >= 0.0f)
 	{
 		GetMesh()->SetScalarParameterValueOnMaterials("TimeToHit", GetWorld()->TimeSeconds);
 	}
-	
+
 	if (NewHealth <= 0.0f && Delta < 0.0f)
 	{
-		APlayerController* PlayerController = Cast<APlayerController>(GetController()); 
+		APlayerController* PlayerController = Cast<APlayerController>(GetController());
 		DisableInput(PlayerController);
+
+		SetLifeSpan(5.0f);
 	}
 }

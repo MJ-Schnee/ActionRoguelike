@@ -7,13 +7,16 @@
 #include "ActionRoguelike/ActionRoguelike.h"
 #include "Net/UnrealNetwork.h"
 
+static TAutoConsoleVariable<bool> CVarDebugActions(
+	TEXT("rl.DebugActions"), false, TEXT("Enables debugging actions (for clients and server)"), ECVF_Cheat);
+
 bool URoguelikeAction::CanStart_Implementation(AActor* Instigator)
 {
 	if (IsRunning())
 	{
 		return false;
 	}
-	
+
 	URoguelikeActionComponent* OwningComp = GetOwningComponent();
 
 	if (OwningComp->ActiveGameplayTags.HasAny(BlockedTags))
@@ -26,7 +29,10 @@ bool URoguelikeAction::CanStart_Implementation(AActor* Instigator)
 
 void URoguelikeAction::StartAction_Implementation(AActor* Instigator)
 {
-	LogOnScreen(this, FString::Printf(TEXT("Started  %s"), *ActionName.ToString()), FColor::Green);
+	if (CVarDebugActions.GetValueOnGameThread())
+	{
+		LogOnScreen(this, FString::Printf(TEXT("Started  %s"), *ActionName.ToString()), FColor::Green);
+	}
 
 	URoguelikeActionComponent* OwningComp = GetOwningComponent();
 	OwningComp->ActiveGameplayTags.AppendTags(GrantsTags);
@@ -37,7 +43,10 @@ void URoguelikeAction::StartAction_Implementation(AActor* Instigator)
 
 void URoguelikeAction::StopAction_Implementation(AActor* Instigator)
 {
-	LogOnScreen(this, FString::Printf(TEXT("Stopped %s"), *ActionName.ToString()), FColor::White);
+	if (CVarDebugActions.GetValueOnGameThread())
+	{
+		LogOnScreen(this, FString::Printf(TEXT("Stopped %s"), *ActionName.ToString()), FColor::White);
+	}
 
 	URoguelikeActionComponent* OwningComp = GetOwningComponent();
 	OwningComp->ActiveGameplayTags.RemoveTags(GrantsTags);
