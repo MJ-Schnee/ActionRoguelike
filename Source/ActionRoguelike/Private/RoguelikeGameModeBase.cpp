@@ -170,13 +170,13 @@ void ARoguelikeGameModeBase::LoadSaveGame()
 
 void ARoguelikeGameModeBase::HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer)
 {
-	Super::HandleStartingNewPlayer_Implementation(NewPlayer);
-
 	ARoguelikePlayerState* PlayerState = NewPlayer->GetPlayerState<ARoguelikePlayerState>();
 	if (PlayerState)
 	{
 		PlayerState->LoadPlayerState(CurrentSaveGame);
 	}
+	
+	Super::HandleStartingNewPlayer_Implementation(NewPlayer);
 }
 
 void ARoguelikeGameModeBase::SpawnBotTimerElapsed()

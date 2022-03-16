@@ -5,10 +5,9 @@
 
 #include "Net/UnrealNetwork.h"
 
-void ARoguelikePlayerState::MulticastCreditsChanged_Implementation(ARoguelikePlayerState* PlayerState, int32 NewCredits,
-                                                                   int32 Delta)
+void ARoguelikePlayerState::OnRep_Credits(int32 OldCredits)
 {
-	OnCreditsChanged.Broadcast(PlayerState, NewCredits, Delta);
+	OnCreditsChanged.Broadcast(this, Credits, Credits - OldCredits);
 }
 
 void ARoguelikePlayerState::AddCredits(int32 Delta)
@@ -19,8 +18,8 @@ void ARoguelikePlayerState::AddCredits(int32 Delta)
 	}
 
 	Credits += Delta;
-
-	MulticastCreditsChanged(this, Credits, Delta);
+	
+	OnRep_Credits(Credits - Delta);
 
 	if (!HasAuthority())
 	{
@@ -41,8 +40,8 @@ bool ARoguelikePlayerState::RemoveCredits(int32 Delta)
 	}
 
 	Credits -= Delta;
-
-	MulticastCreditsChanged(this, Credits, Delta);
+	
+	OnRep_Credits(Credits - Delta);
 
 	return true;
 }
@@ -64,7 +63,9 @@ void ARoguelikePlayerState::LoadPlayerState_Implementation(URoguelikeSaveGame* S
 {
 	if (SaveObject)
 	{
-		Credits = SaveObject->Credits;
+		// Setting credits to 0 then adding them ensures that events are triggered
+		Credits = 0;
+		AddCredits(SaveObject->Credits);
 	}
 }
 

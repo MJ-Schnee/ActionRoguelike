@@ -9,3 +9,8 @@ void ARoguelikePlayerController::SetPawn(APawn* InPawn)
 
 	OnPawnChanged.Broadcast(InPawn);
 }
+
+void ARoguelikePlayerController::BeginPlayingState()
+{
+	BluepringBeginPlayingState();
+}

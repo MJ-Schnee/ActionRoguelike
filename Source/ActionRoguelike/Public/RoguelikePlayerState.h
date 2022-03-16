@@ -18,11 +18,11 @@ class ACTIONROGUELIKE_API ARoguelikePlayerState : public APlayerState
 	GENERATED_BODY()
 
 protected:
-	UPROPERTY(EditDefaultsOnly, Replicated, Category = "Credits")
+	UPROPERTY(EditDefaultsOnly, ReplicatedUsing = "OnRep_Credits", Category = "Credits")
 	int32 Credits;
 
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastCreditsChanged(ARoguelikePlayerState* PlayerState, int32 NewCredits, int32 Delta);
+	UFUNCTION()
+	void OnRep_Credits(int32 OldCredits);
 
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Events")
