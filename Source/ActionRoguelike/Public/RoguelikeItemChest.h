@@ -27,11 +27,13 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UStaticMeshComponent* LidMesh;
 
-	UPROPERTY(ReplicatedUsing="OnRep_LidOpened")
+	UPROPERTY(ReplicatedUsing="OnRep_LidOpened", BlueprintReadOnly, SaveGame)
 	bool bLidOpened;
 
 	UFUNCTION()
 	void OnRep_LidOpened();
+
+	virtual void OnActorLoaded_Implementation() override;
 
 public:
 	ARoguelikeItemChest();

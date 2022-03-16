@@ -30,6 +30,11 @@ void ARoguelikeItemChest::OnRep_LidOpened()
 	LidMesh->SetRelativeRotation(FRotator(CurrPitch, 0, 0));
 }
 
+void ARoguelikeItemChest::OnActorLoaded_Implementation()
+{
+	OnRep_LidOpened();
+}
+
 void ARoguelikeItemChest::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);

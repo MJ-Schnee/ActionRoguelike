@@ -6,12 +6,14 @@
 #include "EngineUtils.h"
 #include "RoguelikeAttributeComponent.h"
 #include "RoguelikeCharacter.h"
+#include "RoguelikeGameplayInterface.h"
 #include "RoguelikePlayerState.h"
 #include "RoguelikeSaveGame.h"
 #include "AI/RoguelikeAICharacter.h"
 #include "EnvironmentQuery/EnvQueryManager.h"
 #include "GameFramework/GameStateBase.h"
 #include "Kismet/GameplayStatics.h"
+#include "Serialization/ObjectAndNameAsStringProxyArchive.h"
 
 
 static TAutoConsoleVariable<bool> CVarSpawnBots(TEXT("rl.SpawnBots"), true,
@@ -89,6 +91,30 @@ void ARoguelikeGameModeBase::WriteSaveGame()
 		PlayerState->SavePlayerState(CurrentSaveGame);
 	}
 
+	CurrentSaveGame->SavedActors.Empty();
+
+	for (FActorIterator Iterator(GetWorld()); Iterator; ++Iterator)
+	{
+		AActor* Actor = *Iterator;
+		// Only track gameplay actors
+		if (!Actor->Implements<URoguelikeGameplayInterface>())
+		{
+			continue;
+		}
+
+		FActorSaveData ActorData;
+		ActorData.ActorName = Actor->GetName();
+		ActorData.ActorTransform = Actor->GetActorTransform();
+
+		// Save actor properties marked as SaveGame
+		FMemoryWriter MemoryWriter(ActorData.CustomActorData);
+		FObjectAndNameAsStringProxyArchive Archive(MemoryWriter, true);
+		Archive.ArIsSaveGame = true;
+		Actor->Serialize(Archive);
+
+		CurrentSaveGame->SavedActors.Add(ActorData);
+	}
+
 	UGameplayStatics::SaveGameToSlot(CurrentSaveGame, SlotName, 0);
 }
 
@@ -104,6 +130,34 @@ void ARoguelikeGameModeBase::LoadSaveGame()
 		}
 
 		UE_LOG(LogTemp, Log, TEXT("Loaded SaveGame Data."));
+
+		for (FActorIterator Iterator(GetWorld()); Iterator; ++Iterator)
+		{
+			AActor* Actor = *Iterator;
+			// Only track gameplay actors
+			if (!Actor->Implements<URoguelikeGameplayInterface>())
+			{
+				continue;
+			}
+			
+			for (FActorSaveData ActorData : CurrentSaveGame->SavedActors)
+			{
+				if (ActorData.ActorName == Actor->GetName())
+				{
+					Actor->SetActorTransform(ActorData.ActorTransform);
+					
+					// Load actor properties marked as SaveGame
+					FMemoryReader MemoryReader(ActorData.CustomActorData);
+					FObjectAndNameAsStringProxyArchive Archive(MemoryReader, true);
+					Archive.ArIsSaveGame = true;
+					Actor->Serialize(Archive);
+
+					IRoguelikeGameplayInterface::Execute_OnActorLoaded(Actor);
+					
+					break;
+				}
+			}
+		}
 	}
 	else
 	{

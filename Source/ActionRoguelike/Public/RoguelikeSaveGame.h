@@ -6,6 +6,22 @@
 #include "GameFramework/SaveGame.h"
 #include "RoguelikeSaveGame.generated.h"
 
+USTRUCT()
+struct FActorSaveData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY()
+	FString ActorName;
+	
+	UPROPERTY()
+	FTransform ActorTransform;
+
+	UPROPERTY()
+	TArray<uint8> CustomActorData;
+};
+
 UCLASS()
 class ACTIONROGUELIKE_API URoguelikeSaveGame : public USaveGame
 {
@@ -14,4 +30,7 @@ class ACTIONROGUELIKE_API URoguelikeSaveGame : public USaveGame
 public:
 	UPROPERTY()
 	int32 Credits;
+
+	UPROPERTY()
+	TArray<FActorSaveData> SavedActors;
 };
