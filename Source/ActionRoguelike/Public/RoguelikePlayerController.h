@@ -14,6 +14,17 @@ class ACTIONROGUELIKE_API ARoguelikePlayerController : public APlayerController
 	GENERATED_BODY()
 
 protected:
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UUserWidget> PauseMenuClass;
+
+	UPROPERTY()
+	UUserWidget* PauseMenuInstance;
+
+	UFUNCTION(BlueprintCallable)
+	void PauseMenuToggle();
+
+	void SetupInputComponent() override;
+
 	UPROPERTY(BlueprintAssignable)
 	FOnPawnChanged OnPawnChanged;
 
@@ -22,5 +33,5 @@ protected:
 	virtual void BeginPlayingState() override;
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void BluepringBeginPlayingState();
+	void BlueprintBeginPlayingState();
 };
