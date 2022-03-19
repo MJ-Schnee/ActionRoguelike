@@ -8,6 +8,10 @@
 #include "RoguelikeActionComponent.generated.h"
 
 class URoguelikeAction;
+class URoguelikeActionComponent;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnActionStateChanged, URoguelikeActionComponent*, OwningComp, URoguelikeAction*,
+                                             Action);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class ACTIONROGUELIKE_API URoguelikeActionComponent : public UActorComponent
@@ -37,17 +41,23 @@ public:
 
 	bool ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags) override;
 
+	UPROPERTY(BlueprintAssignable)
+	FOnActionStateChanged OnActionStarted;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnActionStateChanged OnActionStopped;
+
 protected:
 	UFUNCTION(Server, Reliable)
 	void ServerStartAction(AActor* Instigator, FName ActionName);
-	
+
 	UFUNCTION(Server, Reliable)
 	void ServerStopAction(AActor* Instigator, FName ActionName);
-	
+
 	UPROPERTY(EditAnywhere, Category = "Actions")
 	TArray<TSubclassOf<URoguelikeAction>> DefaultActions;
 
-	UPROPERTY(Replicated)
+	UPROPERTY(BlueprintReadOnly, Replicated)
 	TArray<URoguelikeAction*> Actions;
 
 	virtual void BeginPlay() override;

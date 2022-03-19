@@ -4,6 +4,7 @@
 #include "RoguelikeActionEffect.h"
 
 #include "RoguelikeActionComponent.h"
+#include "GameFramework/GameStateBase.h"
 
 URoguelikeActionEffect::URoguelikeActionEffect()
 {
@@ -37,7 +38,7 @@ void URoguelikeActionEffect::StopAction_Implementation(AActor* Instigator)
 	{
 		ExecutePeriodicEffect(Instigator);
 	}
-	
+
 	Super::StopAction_Implementation(Instigator);
 
 	GetWorld()->GetTimerManager().ClearTimer(DurationHandle);
@@ -47,6 +48,18 @@ void URoguelikeActionEffect::StopAction_Implementation(AActor* Instigator)
 	{
 		ActionComp->RemoveAction(this);
 	}
+}
+
+float URoguelikeActionEffect::TimeRemaining() const
+{
+	AGameStateBase* GameState = GetWorld()->GetGameState<AGameStateBase>();
+	if (GameState)
+	{
+		float EndTime = TimeStarted + Duration;
+		return EndTime - GameState->GetServerWorldTimeSeconds();
+	}
+
+	return Duration;
 }
 
 void URoguelikeActionEffect::ExecutePeriodicEffect_Implementation(AActor* Instigator)

@@ -29,6 +29,9 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "Effect")
 	void ExecutePeriodicEffect(AActor* Instigator);
 
+	UFUNCTION(BlueprintCallable, Category = "Actions")
+	float TimeRemaining() const;
+
 public:
 	URoguelikeActionEffect();
 };

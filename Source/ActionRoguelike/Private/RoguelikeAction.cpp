@@ -39,6 +39,14 @@ void URoguelikeAction::StartAction_Implementation(AActor* Instigator)
 
 	RepData.bIsRunning = true;
 	RepData.Instigator = Instigator;
+
+	// Use server time for start time
+	if (OwningComp->GetOwnerRole() == ROLE_Authority)
+	{
+		TimeStarted = GetWorld()->TimeSeconds;	
+	}
+
+	GetOwningComponent()->OnActionStarted.Broadcast(OwningComp, this);
 }
 
 void URoguelikeAction::StopAction_Implementation(AActor* Instigator)
@@ -53,6 +61,8 @@ void URoguelikeAction::StopAction_Implementation(AActor* Instigator)
 
 	RepData.bIsRunning = false;
 	RepData.Instigator = Instigator;
+	
+	GetOwningComponent()->OnActionStopped.Broadcast(OwningComp, this);
 }
 
 UWorld* URoguelikeAction::GetWorld() const
@@ -99,4 +109,5 @@ void URoguelikeAction::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty
 
 	DOREPLIFETIME(URoguelikeAction, RepData);
 	DOREPLIFETIME(URoguelikeAction, ActionComp);
+	DOREPLIFETIME(URoguelikeAction, TimeStarted);
 }
