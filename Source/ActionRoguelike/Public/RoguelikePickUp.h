@@ -14,6 +14,8 @@ class ACTIONROGUELIKE_API ARoguelikePickUp : public AActor, public IRoguelikeGam
 public:
 	ARoguelikePickUp();
 
+	FText GetInteractText_Implementation(APawn* InstigatorPawn) override;
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UStaticMeshComponent* MeshComp;

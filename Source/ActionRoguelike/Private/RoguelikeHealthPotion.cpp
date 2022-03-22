@@ -6,10 +6,25 @@
 #include "RoguelikePlayerState.h"
 #include "RoguelikeAttributeComponent.h"
 
+#define LOCTEXT_NAMESPACE "InteractableActors"
+
 ARoguelikeHealthPotion::ARoguelikeHealthPotion()
 {
 	HealAmount = 100.0f;
 	Cost = 100;
+}
+
+FText ARoguelikeHealthPotion::GetInteractText_Implementation(APawn* InstigatorPawn)
+{
+	URoguelikeAttributeComponent* AttributeComponent = Cast<URoguelikeAttributeComponent>(
+		InstigatorPawn->GetComponentByClass(URoguelikeAttributeComponent::StaticClass()));
+	if (AttributeComponent && AttributeComponent->GetHealth() == AttributeComponent->GetMaxHealth())
+	{
+		return NSLOCTEXT(LOCTEXT_NAMESPACE, "HealthPotion_FullHealthWarning", "Already at full health.");
+	}
+
+	return FText::Format(NSLOCTEXT(LOCTEXT_NAMESPACE, "HealthPotion_InteractMessage",
+	                               "Costs {0} credits. Restores {1} HP."), Cost, HealAmount);
 }
 
 void ARoguelikeHealthPotion::Interact_Implementation(APawn* InstigatorPawn)
@@ -45,3 +60,5 @@ void ARoguelikeHealthPotion::Interact_Implementation(APawn* InstigatorPawn)
 		PlayerState->RemoveCredits(Cost);
 	}
 }
+
+#undef LOCTEXT_NAMESPACE

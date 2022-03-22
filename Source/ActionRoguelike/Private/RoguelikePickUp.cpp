@@ -13,6 +13,11 @@ ARoguelikePickUp::ARoguelikePickUp()
 	bReplicates = true;
 }
 
+FText ARoguelikePickUp::GetInteractText_Implementation(APawn* InstigatorPawn)
+{
+	return FText::GetEmpty();
+}
+
 void ARoguelikePickUp::SetItemVisible(bool Visible)
 {
 	RootComponent->SetVisibility(Visible, true);
