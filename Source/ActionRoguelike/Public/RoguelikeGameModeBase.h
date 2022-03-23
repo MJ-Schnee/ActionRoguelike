@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Engine/DataTable.h"
 #include "EnvironmentQuery/EnvQueryTypes.h"
 #include "GameFramework/GameModeBase.h"
 #include "RoguelikeGameModeBase.generated.h"
@@ -10,6 +11,33 @@
 class URoguelikeSaveGame;
 class UEnvQueryInstanceBlueprintWrapper;
 class UEnvQuery;
+class URoguelikeMonsterData;
+
+USTRUCT(BlueprintType)
+struct FMonsterInfoRow : public FTableRowBase
+{
+	GENERATED_BODY()
+
+public:
+	FMonsterInfoRow()
+	{
+		Weight = 1.0f;
+		SpawnCost = 5.0f;
+		KillReward = 20.0f;
+	}
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FPrimaryAssetId MonsterId;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float Weight;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float SpawnCost;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float KillReward;
+};
 
 UCLASS()
 class ACTIONROGUELIKE_API ARoguelikeGameModeBase : public AGameModeBase
@@ -39,7 +67,7 @@ protected:
 	FString SlotName;
 
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
-	TSubclassOf<AActor> MinionClass;
+	UDataTable* MonsterTable;
 
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	UEnvQuery* SpawnBotQuery;
@@ -69,6 +97,9 @@ protected:
 
 	UFUNCTION()
 	void OnSpawnBotQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstance, EEnvQueryStatus::Type QueryStatus);
+
+	UFUNCTION()
+	void OnMonsterLoaded(FPrimaryAssetId MonsterId, FVector SpawnLocation);
 
 	UFUNCTION()
 	void RespawnPlayerElapsed(AController* Controller);

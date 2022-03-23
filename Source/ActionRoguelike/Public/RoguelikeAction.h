@@ -28,7 +28,7 @@ class ACTIONROGUELIKE_API URoguelikeAction : public UObject
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
-	UTexture2D* Icon;
+	TSoftObjectPtr<UTexture2D> Icon;
 
 	UPROPERTY(Replicated)
 	URoguelikeActionComponent* ActionComp;

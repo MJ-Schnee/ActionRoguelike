@@ -4,12 +4,16 @@
 #include "RoguelikeGameModeBase.h"
 
 #include "EngineUtils.h"
+#include "RoguelikeActionComponent.h"
 #include "RoguelikeAttributeComponent.h"
 #include "RoguelikeCharacter.h"
 #include "RoguelikeGameplayInterface.h"
+#include "RoguelikeMonsterData.h"
 #include "RoguelikePlayerState.h"
 #include "RoguelikeSaveGame.h"
+#include "ActionRoguelike/ActionRoguelike.h"
 #include "AI/RoguelikeAICharacter.h"
+#include "Engine/AssetManager.h"
 #include "EnvironmentQuery/EnvQueryManager.h"
 #include "GameFramework/GameStateBase.h"
 #include "Kismet/GameplayStatics.h"
@@ -139,13 +143,13 @@ void ARoguelikeGameModeBase::LoadSaveGame()
 			{
 				continue;
 			}
-			
+
 			for (FActorSaveData ActorData : CurrentSaveGame->SavedActors)
 			{
 				if (ActorData.ActorName == Actor->GetName())
 				{
 					Actor->SetActorTransform(ActorData.ActorTransform);
-					
+
 					// Load actor properties marked as SaveGame
 					FMemoryReader MemoryReader(ActorData.CustomActorData);
 					FObjectAndNameAsStringProxyArchive Archive(MemoryReader, true);
@@ -153,7 +157,7 @@ void ARoguelikeGameModeBase::LoadSaveGame()
 					Actor->Serialize(Archive);
 
 					IRoguelikeGameplayInterface::Execute_OnActorLoaded(Actor);
-					
+
 					break;
 				}
 			}
@@ -175,7 +179,7 @@ void ARoguelikeGameModeBase::HandleStartingNewPlayer_Implementation(APlayerContr
 	{
 		PlayerState->LoadPlayerState(CurrentSaveGame);
 	}
-	
+
 	Super::HandleStartingNewPlayer_Implementation(NewPlayer);
 }
 
@@ -236,7 +240,56 @@ void ARoguelikeGameModeBase::OnSpawnBotQueryCompleted(UEnvQueryInstanceBlueprint
 
 	if (QueryInstance->GetQueryResultsAsLocations(SpawnLocations))
 	{
-		GetWorld()->SpawnActor<AActor>(MinionClass, SpawnLocations[0], FRotator::ZeroRotator);
+		if (MonsterTable)
+		{
+			TArray<FMonsterInfoRow*> MonsterRows;
+			MonsterTable->GetAllRows("", MonsterRows);
+
+			int32 RandomIndex = FMath::RandRange(0, MonsterRows.Num() - 1);
+			FMonsterInfoRow* SelectedMonsterRow = MonsterRows[RandomIndex];
+
+			UAssetManager* Manager = UAssetManager::GetIfValid();
+			if (Manager)
+			{
+				LogOnScreen(this, "Loading monster...", FColor::Green);
+				
+				TArray<FName> Bundles;
+				FStreamableDelegate Delegate = FStreamableDelegate::CreateUObject(
+					this, &ARoguelikeGameModeBase::OnMonsterLoaded, SelectedMonsterRow->MonsterId, SpawnLocations[0]);
+				Manager->LoadPrimaryAsset(SelectedMonsterRow->MonsterId, Bundles, Delegate);
+			}
+		}
+	}
+}
+
+void ARoguelikeGameModeBase::OnMonsterLoaded(FPrimaryAssetId MonsterId, FVector SpawnLocation)
+{
+	LogOnScreen(this, "Finished loading.", FColor::Green);
+	
+	UAssetManager* Manager = UAssetManager::GetIfValid();
+	if (Manager)
+	{
+		URoguelikeMonsterData* MonsterData = Cast<URoguelikeMonsterData>(Manager->GetPrimaryAssetObject(MonsterId));
+		if (MonsterData)
+		{
+			AActor* NewBot = GetWorld()->SpawnActor<AActor>(MonsterData->MonsterClass, SpawnLocation,
+			                                                FRotator::ZeroRotator);
+			if (NewBot)
+			{
+				LogOnScreen(this, FString::Printf(TEXT("Spawned enemy: %s (%s)"), *GetNameSafe(NewBot),
+				                                  *GetNameSafe(MonsterData)));
+
+				URoguelikeActionComponent* BotActionComp = Cast<URoguelikeActionComponent>(
+					NewBot->GetComponentByClass(URoguelikeActionComponent::StaticClass()));
+				if (BotActionComp)
+				{
+					for (TSubclassOf<URoguelikeAction> ActionClass : MonsterData->Actions)
+					{
+						BotActionComp->AddAction(NewBot, ActionClass);
+					}
+				}
+			}
+		}
 	}
 }
 
