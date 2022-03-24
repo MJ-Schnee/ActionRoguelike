@@ -24,7 +24,7 @@ ARoguelikeProjectile::ARoguelikeProjectile()
 	MovementComp->bInitialVelocityInLocalSpace = true;
 	MovementComp->ProjectileGravityScale = 0.0f;
 
-	SetReplicates(true);
+	bReplicates = true;
 }
 
 void ARoguelikeProjectile::PostInitializeComponents()

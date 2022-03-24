@@ -7,6 +7,8 @@
 #include "Engine/ActorChannel.h"
 #include "Net/UnrealNetwork.h"
 
+DECLARE_CYCLE_STAT(TEXT("StartActionByName"), STAT_StartActionByName, STATGROUP_ROGUELIKE);
+
 static TAutoConsoleVariable<bool> CVarDebugActionComponent(
 	TEXT("rl.DebugActionComponent"), false, TEXT("Show debug messages from the Action Component."), ECVF_Cheat);
 static TAutoConsoleVariable<bool> CVarDebugNetworkActionComponent(
@@ -47,21 +49,34 @@ void URoguelikeActionComponent::BeginPlay()
 	}
 }
 
+void URoguelikeActionComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	// Stop all actions
+	TArray<URoguelikeAction*> ActionsCopy = Actions;
+	for (URoguelikeAction* Action : ActionsCopy)
+	{
+		if (Action && Action->IsRunning())
+		{
+			Action->StopAction(GetOwner());
+		}
+	}
+	
+	Super::EndPlay(EndPlayReason);
+}
+
 void URoguelikeActionComponent::TickComponent(float DeltaTime, ELevelTick TickType,
                                               FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// Draw All Actions
+	// Log all actions
 	if (CVarDebugNetworkActionComponent.GetValueOnGameThread())
 	{
 		for (URoguelikeAction* Action : Actions)
 		{
 			FColor TextColor = Action->IsRunning() ? FColor::Blue : FColor::White;
-
 			FString ActionMsg = FString::Printf(TEXT("[%s] Action: %s"), *GetNameSafe(GetOwner()), *GetNameSafe(Action));
-
-			// LogOnScreen(this, ActionMsg, TextColor, 0.0f);
+			LogOnScreen(this, ActionMsg, TextColor, 0.0f);
 		}
 	}
 }
@@ -116,6 +131,8 @@ void URoguelikeActionComponent::ServerStopAction_Implementation(AActor* Instigat
 
 bool URoguelikeActionComponent::StartActionByName(AActor* Instigator, FName ActionName)
 {
+	SCOPE_CYCLE_COUNTER(STAT_StartActionByName);
+	
 	for (URoguelikeAction* Action : Actions)
 	{
 		if (Action && Action->ActionName == ActionName)
@@ -129,6 +146,8 @@ bool URoguelikeActionComponent::StartActionByName(AActor* Instigator, FName Acti
 				}
 				continue;
 			}
+
+			TRACE_BOOKMARK(TEXT("StartAction::%s"), *GetNameSafe(Action));
 			
 			Action->StartAction(Instigator);
 

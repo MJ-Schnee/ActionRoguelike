@@ -22,6 +22,8 @@ ARoguelikeMagicProjectile::ARoguelikeMagicProjectile()
 	CameraShakeInnerRadius = 100.0f;
 	CameraShakeOuterRadius = 800.0f;
 
+	InitialLifeSpan = 10.0f;
+
 	Damage = 20.f;
 }
 
