@@ -19,8 +19,10 @@ void URoguelikeWorldUserWidget::NativeTick(const FGeometry& MyGeometry, float In
 	}
 
 	FVector2D ScreenPosition;
-	if (UGameplayStatics::ProjectWorldToScreen(GetOwningPlayer(),
-		AttachedActor->GetActorLocation() + WorldOffset, ScreenPosition))
+	bool bIsVisibleOnScreen = UGameplayStatics::ProjectWorldToScreen(GetOwningPlayer(),
+	                                                                 AttachedActor->GetActorLocation() + WorldOffset,
+	                                                                 ScreenPosition);
+	if (bIsVisibleOnScreen)
 	{
 		float ViewportScale = UWidgetLayoutLibrary::GetViewportScale(this);
 
@@ -30,5 +32,12 @@ void URoguelikeWorldUserWidget::NativeTick(const FGeometry& MyGeometry, float In
 		{
 			ParentSizeBox->SetRenderTranslation(ScreenPosition);
 		}
+	}
+
+	if (ParentSizeBox)
+	{
+		ParentSizeBox->SetVisibility(bIsVisibleOnScreen
+			                             ? ESlateVisibility::HitTestInvisible
+			                             : ESlateVisibility::Collapsed);
 	}
 }
